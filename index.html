@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hellmouth</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage"></div>
+<canvas id="hud"></canvas>
+<div id="flash"></div>
+
+<div id="bar">
+  <div class="stat"><b id="hp">100</b><span>HEALTH</span></div>
+  <div class="stat"><b id="ammo">40</b><span>AMMO</span></div>
+  <div class="stat"><b id="kills">0</b><span>FRAGS</span></div>
+  <div class="stat ai"><span>AI</span><b id="ai">wandering</b></div>
+  <div class="stat fps"><b id="fps">60</b><span>FPS</span></div>
+</div>
+
+<div id="overlay">
+  <div class="panel">
+    <h1 id="ovTitle">HELLMOUTH</h1>
+    <p id="ovText">Test spike: hilly terrain, walls, a hitscan shotgun and one imp with simple AI. It wanders, spots you, chases you, throws fireballs and searches the place it last saw you.</p>
+    <div class="keys">
+      <kbd>W A S D</kbd><span>move</span>
+      <kbd>Mouse</kbd><span>look</span>
+      <kbd>LMB</kbd><span>shoot (hold for auto fire)</span>
+      <kbd>Shift</kbd><span>run</span>
+      <kbd>Space</kbd><span>jump</span>
+      <kbd>Esc</kbd><span>pause</span>
+    </div>
+    <button class="go" id="goBtn" type="button">CLICK TO PLAY</button>
+    <p class="note">Needs a keyboard and mouse. Not playable on phones.</p>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
