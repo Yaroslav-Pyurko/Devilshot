@@ -1,6 +1,6 @@
 // Start / pause / death screen.
 const SCREENS = {
-  start: { title: 'HELLMOUTH', button: 'CLICK TO PLAY' },
+  start: { title: 'DEVILSHOT', button: 'CLICK TO PLAY' },
   pause: { title: 'PAUSED', button: 'RESUME' },
   dead: { title: 'YOU DIED', button: 'TRY AGAIN' }
 };
