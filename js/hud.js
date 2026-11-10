@@ -55,7 +55,8 @@ export class Hud {
     // weapon position with walk bob and recoil
     const bx = reduceMotion ? 0 : Math.cos(player.bob * 0.5) * 5;
     const by = reduceMotion ? 0 : Math.abs(Math.sin(player.bob * 0.5)) * 4;
-    const gx = cx + 18 + bx, gy = h - 34 + by + weapon.recoil * 14;
+    // held to the right of the crosshair (modern style) so it never hides the target
+    const gx = cx + 62 + bx, gy = h - 30 + by + weapon.recoil * 14;
 
     if (weapon.flash > 0) {
       g.fillStyle = '#ff9a20'; g.beginPath();

@@ -217,6 +217,6 @@ export class Imp {
   }
 
   _syncSprite() {
-    this.sprite.position.set(this.pos.x, this.pos.y + (this.alive ? 1.15 : 0.9), this.pos.z);
+    this.sprite.position.set(this.pos.x, this.pos.y + ENEMY.spriteSize / 2 - (this.alive ? 0 : 0.2), this.pos.z);
   }
 }

@@ -51,7 +51,7 @@ export class Game {
     this.scene.fog = new THREE.Fog(RENDER.fogColor, RENDER.fogNear, RENDER.fogFar);
     this.scene.background = new THREE.Color(RENDER.fogColor);
 
-    this.camera = new THREE.PerspectiveCamera(RENDER.fov, innerWidth / innerHeight, 0.05, 500);
+    this.camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 500);
     this.camera.rotation.order = 'YXZ';
     this.scene.add(this.camera);
 
@@ -112,6 +112,9 @@ export class Game {
     this.renderer.setPixelRatio(RENDER.scale);
     this.renderer.setSize(innerWidth, innerHeight);
     this.camera.aspect = innerWidth / innerHeight;
+    // Three.js takes a vertical FOV; derive it so the horizontal FOV stays fixed.
+    const h = THREE.MathUtils.degToRad(RENDER.fovHorizontal);
+    this.camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(h / 2) / this.camera.aspect));
     this.camera.updateProjectionMatrix();
     this.hud.resize();
   }

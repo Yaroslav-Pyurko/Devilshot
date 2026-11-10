@@ -2,7 +2,7 @@
 
 export const RENDER = {
   scale: 0.42,          // internal resolution vs screen; lower = chunkier pixels, higher FPS
-  fov: 75,
+  fovHorizontal: 90,   // degrees, kept constant on any aspect ratio (modern shooters: 90-100)
   fogColor: 0x3b1a12,
   fogNear: 6,
   fogFar: 80
@@ -17,7 +17,7 @@ export const ARENA = {
 
 export const PLAYER = {
   start: { x: 0, z: 24 },
-  eyeHeight: 1.6,
+  eyeHeight: 1.75,     // modern eye level; classic DOOM feel was ~1.6 with a 2.3 m imp
   radius: 0.4,
   walkSpeed: 8,
   runSpeed: 13,
@@ -41,8 +41,8 @@ export const ENEMY = {
   start: { x: 0, z: -32 },
   maxHp: 100,
   radius: 0.6,
-  spriteSize: 2.3,
-  eyeHeight: 1.7,
+  spriteSize: 1.9,     // imp height in metres (sprite art fills the full frame)
+  eyeHeight: 1.6,      // where it looks from and throws fireballs
   sightRange: 50,
   closeSenseRange: 10,  // notices you from any direction inside this radius
   viewConeDot: -0.35,   // ~140° cone while wandering
