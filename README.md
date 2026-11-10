@@ -1,4 +1,4 @@
-# Hellmouth
+# Devilshot
 
 DOOM-style 3D shooter spike in the browser. Three.js r128, plain ES modules, no build step.
 
@@ -6,7 +6,7 @@ DOOM-style 3D shooter spike in the browser. Three.js r128, plain ES modules, no 
 
 ES modules don't load from `file://`, so the game must be served over http:
 
-- **Windows:** double-click `start.cmd`. It starts a tiny PowerShell server on http://localhost:8080 and opens the browser. Close the window to stop it.
+- **Windows:** double-click `start.cmd`. It starts a tiny PowerShell server on http://localhost:8080 (or the next free port if 8080 is busy) and opens the browser. Close the window to stop it.
 - **Alternatives:** VS Code "Live Server", `npx serve .`, or `python -m http.server 8080`.
 
 Everything (Three.js, fonts) is in the repo, so it works offline.

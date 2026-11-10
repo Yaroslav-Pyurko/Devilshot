@@ -1,9 +1,11 @@
 # Minimal static file server for local development (no installs needed).
 # ES modules don't load from file://, so the game has to be opened over http.
+# Usage: start.cmd            (first free port from 8080)
+#        start.cmd -Port 9000
 param([int]$Port = 8080)
 
+$ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\') + '\'
-$prefix = "http://localhost:$Port/"
 $mime = @{
   '.html'  = 'text/html; charset=utf-8'
   '.js'    = 'text/javascript; charset=utf-8'
@@ -17,10 +19,29 @@ $mime = @{
   '.txt'   = 'text/plain; charset=utf-8'
 }
 
-$listener = [System.Net.HttpListener]::new()
-$listener.Prefixes.Add($prefix)
-$listener.Start()
-Write-Host "Hellmouth is running at $prefix"
+# Find a free port: an old server window (e.g. from before a folder rename) may still hold 8080.
+$listener = $null
+foreach ($p in $Port..($Port + 10)) {
+  $candidate = [System.Net.HttpListener]::new()
+  $candidate.Prefixes.Add("http://localhost:$p/")
+  try {
+    $candidate.Start()
+    $listener = $candidate
+    $Port = $p
+    break
+  } catch {
+    $candidate.Close()
+    Write-Host "Port $p is busy, trying the next one..." -ForegroundColor DarkYellow
+  }
+}
+if (-not $listener) {
+  Write-Host "Could not start the server: ports $Port..$($Port + 10) are all busy." -ForegroundColor Red
+  exit 1
+}
+
+$prefix = "http://localhost:$Port/"
+Write-Host "Devilshot is running at $prefix"
+Write-Host "Serving files from $root"
 Write-Host "Close this window to stop the server."
 Start-Process $prefix
 
@@ -41,9 +62,11 @@ try {
         $res.OutputStream.Write($bytes, 0, $bytes.Length)
       } else {
         $res.StatusCode = 404
+        Write-Host "404 $rel" -ForegroundColor DarkYellow
       }
     } catch {
       $res.StatusCode = 500
+      Write-Host "500 $rel : $_" -ForegroundColor Red
     } finally {
       $res.Close()
     }
