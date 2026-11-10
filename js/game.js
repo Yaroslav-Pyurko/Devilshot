@@ -31,7 +31,7 @@ export class Game {
     this.fireballs = new Fireballs(this.scene, textures.fire, this.world, this.particles);
     this.player = new Player(this.world);
     this.weapon = new Weapon(this.camera, this.world, this.particles);
-    this.enemy = new Imp(this.scene, textures, this.world, this.fireballs, this.player);
+    this.enemy = new Imp(this.scene, this.world, this.fireballs, this.player);
     this.enemies = [this.enemy]; // add more imps here later; weapon already takes a list
     this.viewModel = new ViewModel(this.renderer, textures.fire);
 

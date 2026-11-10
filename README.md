@@ -27,13 +27,14 @@ js/world.js         terrain height field, sky, walls, collision, line of sight
 js/player.js        movement, gravity, jumping, health
 js/weapon.js        hitscan shotgun, ammo, muzzle flash, recoil
 js/viewmodel.js     3D chrome double-barrel model: own render pass, recoil, sway, bob, muzzle flash
-js/enemy.js         Imp sprite and its AI state machine (wander, chase, search)
+js/enemy.js         Imp AI state machine (wander, chase, search), attack timing
+js/impModel.js      original low-poly imp: procedural skeleton, walk/throw/melee/pain/death animations
 js/projectiles.js   enemy fireballs
 js/particles.js     hit puffs, blood, explosion sparks
 js/hud.js           crosshair canvas, status bar
 js/input.js         keyboard, mouse, pointer lock
 js/overlay.js       start / pause / death screen
-js/textures.js      texture loading/filtering, procedural imp sprite and particles
+js/textures.js      texture loading/filtering, particle sprites
 js/audio.js         synthesized WebAudio sound effects
 js/utils.js         small helpers
 lib/three.module.js Three.js r128 (MIT, see lib/three.LICENSE.txt)

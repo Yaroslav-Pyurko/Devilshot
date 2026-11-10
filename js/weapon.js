@@ -31,7 +31,7 @@ export class Weapon {
     this.muzzleLight.intensity = Math.max(0, this.muzzleLight.intensity - dt * 30);
   }
 
-  // Targets are objects that implement { sprite, alive, takeDamage(n) }.
+  // Targets are objects that implement { hitTarget (Object3D), alive, takeDamage(n) }.
   tryFire(player, targets) {
     if (this.cooldown > 0 || !player.alive) return;
     if (player.ammo <= 0) { sfx.empty(); this.cooldown = 0.3; return; }
@@ -47,11 +47,11 @@ export class Weapon {
     const s = WEAPON.spread;
     this.ray.setFromCamera({ x: (Math.random() - 0.5) * s, y: (Math.random() - 0.5) * s }, this.camera);
     const live = targets.filter(t => t.alive);
-    const hits = this.ray.intersectObjects([...this.world.solids, ...live.map(t => t.sprite)], false);
+    const hits = this.ray.intersectObjects([...this.world.solids, ...live.map(t => t.hitTarget)], true);
     if (!hits.length) return;
 
     const hit = hits[0];
-    const target = live.find(t => t.sprite === hit.object);
+    const target = live.find(t => isPartOf(hit.object, t.hitTarget));
     if (target) {
       target.takeDamage(WEAPON.damage);
       this.particles.burst(hit.point, 0xb01010, 7, 3);
@@ -59,4 +59,9 @@ export class Weapon {
       this.particles.burst(hit.point, 0xa89878, 5, 1.6);
     }
   }
+}
+
+function isPartOf(obj, root) {
+  for (let o = obj; o; o = o.parent) if (o === root) return true;
+  return false;
 }

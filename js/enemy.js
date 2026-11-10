@@ -1,4 +1,4 @@
-// Imp: billboard sprite enemy with a small finite state machine.
+// Imp: 3D low-poly demon (js/impModel.js) driven by a small finite state machine.
 //
 //   wander ──(sees player)──► chase ──(loses sight, reaches last seen spot)──► search
 //     ▲                          │                                              │
@@ -9,12 +9,15 @@ import * as THREE from '../lib/three.module.js';
 import { ENEMY } from './config.js';
 import { randRange } from './utils.js';
 import { sfx } from './audio.js';
+import { ImpRig } from './impModel.js';
+
+const THROW_TIME = 0.6, THROW_RELEASE = 0.45; // fireball leaves the hand at 45% of the throw
+const MELEE_TIME = 0.45, MELEE_HIT = 0.35;
 
 export const AI_STATE = { WANDER: 'wander', CHASE: 'chase', SEARCH: 'search' };
 
 export class Imp {
-  constructor(scene, textures, world, fireballs, player) {
-    this.textures = textures.imp;
+  constructor(scene, world, fireballs, player) {
     this.world = world;
     this.fireballs = fireballs;
     this.player = player;
@@ -23,9 +26,10 @@ export class Imp {
     this.pos = new THREE.Vector3();
     this.lastSeen = new THREE.Vector2();
     this.wanderTarget = new THREE.Vector2();
-    this.sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.textures.walk1, alphaTest: 0.5 }));
-    this.sprite.scale.set(ENEMY.spriteSize, ENEMY.spriteSize, 1);
-    scene.add(this.sprite);
+    this.rig = new ImpRig(ENEMY.height);
+    scene.add(this.rig.root);
+    this.hitTarget = this.rig.root; // the weapon raycasts against the whole model
+    this.yaw = 0;
 
     this._eye = new THREE.Vector3();
     this._playerEye = new THREE.Vector3();
@@ -55,10 +59,14 @@ export class Imp {
     this.searchTimer = 0;
     this.meleeCooldown = 0;
     this.walkPhase = 0;
+    this.moveSpeed = 0;
     this.respawnTimer = 0;
-    this.sprite.material.map = this.textures.walk1;
+    this.throwT = -1;   // seconds into the throw animation, -1 = not throwing
+    this.meleeT = -1;
+    this.deadT = -1;
     this._pickWanderTarget();
-    this._syncSprite();
+    this.yaw = Math.atan2(this.wanderTarget.x - x, this.wanderTarget.y - z);
+    this._syncModel(0);
   }
 
   respawnAwayFrom(p) {
@@ -84,7 +92,8 @@ export class Imp {
     if (this.hp <= 0) {
       this.alive = false;
       this.respawnTimer = ENEMY.respawnDelay;
-      this.sprite.material.map = this.textures.dead;
+      this.deadT = 0;
+      this.throwT = this.meleeT = -1;
       sfx.death();
       this.onKilled();
     } else sfx.enemyPain();
@@ -93,8 +102,9 @@ export class Imp {
   update(dt) {
     if (!this.alive) {
       this.respawnTimer -= dt;
+      this.deadT += dt;
       if (this.respawnTimer <= 0) this.respawnAwayFrom(this.player.pos);
-      this._syncSprite();
+      this._syncModel(dt);
       return;
     }
     this.attackCooldown -= dt; this.attackAnim -= dt; this.painTimer -= dt; this.losTimer -= dt;
@@ -109,8 +119,9 @@ export class Imp {
 
     const speed = this._think(dt, dx, dz, dist);
     this._move(dt, speed);
-    this._animate();
-    this._syncSprite();
+    this._updateAttacks(dt);
+    this._face(dt, dx, dz);
+    this._syncModel(dt);
   }
 
   // Sight check, throttled because raycasts against the terrain are not free.
@@ -142,11 +153,15 @@ export class Imp {
           goal.set(this.pos.x - dz / dist * this.strafeDir * 5, this.pos.z + dx / dist * this.strafeDir * 5);
           speed = ENEMY.strafeSpeed;
         }
-        if (dist < ENEMY.attackRange && this.attackCooldown <= 0) this._throwFireball();
-        if (dist < ENEMY.meleeRange && this.meleeCooldown <= 0) {
-          this.player.hurt(ENEMY.meleeDamage);
+        const busy = this.throwT >= 0 || this.meleeT >= 0;
+        if (!busy && dist < ENEMY.meleeRange && this.meleeCooldown <= 0) {
+          this.meleeT = 0;
           this.meleeCooldown = ENEMY.meleeCooldown;
-          this.attackAnim = 0.3;
+          this.attackAnim = MELEE_TIME;
+        } else if (!busy && dist < ENEMY.attackRange && this.attackCooldown <= 0) {
+          this.throwT = 0;
+          this.attackCooldown = randRange(ENEMY.attackCooldown);
+          this.attackAnim = THROW_TIME;
         }
       } else {
         goal.copy(this.lastSeen); speed = ENEMY.chaseSpeed;
@@ -174,6 +189,7 @@ export class Imp {
   _move(dt, speed) {
     let gx = this._goal.x - this.pos.x, gz = this._goal.y - this.pos.z;
     const gl = Math.hypot(gx, gz);
+    this.moveSpeed = 0;
     if (gl > 0.05 && speed > 0) {
       gx /= gl; gz /= gl;
       if (this.steerTimer > 0) {
@@ -188,6 +204,8 @@ export class Imp {
         if (this.state === AI_STATE.WANDER) this._pickWanderTarget();
       }
       this.walkPhase += dt * speed;
+      this.moveSpeed = moved / dt;
+      this.moveDir = Math.atan2(gx, gz);
     }
     // Don't walk into the player.
     const p = this.player.pos;
@@ -196,11 +214,36 @@ export class Imp {
     this.pos.y = this.world.heightAt(this.pos.x, this.pos.z);
   }
 
-  _throwFireball() {
-    const from = new THREE.Vector3(this.pos.x, this.pos.y + ENEMY.eyeHeight, this.pos.z);
-    this.fireballs.spawn(from, this.player.eye(new THREE.Vector3()), this.player.volumeAt(from));
-    this.attackCooldown = randRange(ENEMY.attackCooldown);
-    this.attackAnim = 0.45;
+  // Advance attack animations and fire their effects at the right moment.
+  _updateAttacks(dt) {
+    if (this.throwT >= 0) {
+      const before = this.throwT;
+      this.throwT += dt;
+      if (before < THROW_TIME * THROW_RELEASE && this.throwT >= THROW_TIME * THROW_RELEASE) {
+        const from = this.rig.handWorldPosition(new THREE.Vector3());
+        this.fireballs.spawn(from, this.player.eye(new THREE.Vector3()), this.player.volumeAt(from));
+      }
+      if (this.throwT >= THROW_TIME) this.throwT = -1;
+    }
+    if (this.meleeT >= 0) {
+      const before = this.meleeT;
+      this.meleeT += dt;
+      const hitAt = MELEE_TIME * MELEE_HIT;
+      if (before < hitAt && this.meleeT >= hitAt) {
+        const p = this.player.pos;
+        if (Math.hypot(p.x - this.pos.x, p.z - this.pos.z) < ENEMY.meleeRange + 0.4) this.player.hurt(ENEMY.meleeDamage);
+      }
+      if (this.meleeT >= MELEE_TIME) this.meleeT = -1;
+    }
+  }
+
+  // Turn smoothly: toward the player while fighting, otherwise along the walking direction.
+  _face(dt, dx, dz) {
+    let target = this.yaw;
+    if (this.state === AI_STATE.CHASE && this.sees) target = Math.atan2(dx, dz);
+    else if (this.moveSpeed > 0.2) target = this.moveDir;
+    let diff = ((target - this.yaw + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+    this.yaw += diff * (1 - Math.exp(-dt * 8));
   }
 
   _pickWanderTarget() {
@@ -209,14 +252,17 @@ export class Imp {
     this.wanderTimer = 8;
   }
 
-  _animate() {
-    const t = this.textures;
-    this.sprite.material.map = this.painTimer > 0 ? t.pain
-      : this.attackAnim > 0 ? t.attack
-      : Math.floor(this.walkPhase * 1.6) % 2 ? t.walk2 : t.walk1;
-  }
-
-  _syncSprite() {
-    this.sprite.position.set(this.pos.x, this.pos.y + ENEMY.spriteSize / 2 - (this.alive ? 0 : 0.2), this.pos.z);
+  _syncModel(dt) {
+    this.rig.root.position.copy(this.pos);
+    this.rig.root.rotation.y = this.yaw;
+    this.rig.update({
+      dt,
+      walkPhase: this.walkPhase,
+      moveSpeed: this.alive ? this.moveSpeed : 0,
+      attackT: this.throwT >= 0 ? this.throwT / THROW_TIME : -1,
+      meleeT: this.meleeT >= 0 ? this.meleeT / MELEE_TIME : -1,
+      painT: this.painTimer > 0 ? this.painTimer / 0.2 : 0,
+      deadT: this.alive ? -1 : this.deadT
+    });
   }
 }
