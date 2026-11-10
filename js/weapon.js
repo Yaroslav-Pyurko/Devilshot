@@ -21,6 +21,7 @@ export class Weapon {
     this.cooldown = 0;
     this.flash = 0;   // seconds the muzzle flash stays visible
     this.recoil = 0;  // 0..1, kicks the gun sprite down
+    this.justFired = false; // consumed by the viewmodel to start its recoil animation
   }
 
   update(dt) {
@@ -39,6 +40,7 @@ export class Weapon {
     this.cooldown = WEAPON.cooldown;
     this.flash = 0.07;
     this.recoil = 1;
+    this.justFired = true;
     this.muzzleLight.intensity = 3.5;
     sfx.shot();
 

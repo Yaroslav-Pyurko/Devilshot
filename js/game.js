@@ -11,6 +11,7 @@ import { Player } from './player.js';
 import { Weapon } from './weapon.js';
 import { Imp } from './enemy.js';
 import { Hud } from './hud.js';
+import { ViewModel } from './viewmodel.js';
 import { Input } from './input.js';
 import { Overlay } from './overlay.js';
 
@@ -32,6 +33,7 @@ export class Game {
     this.weapon = new Weapon(this.camera, this.world, this.particles);
     this.enemy = new Imp(this.scene, textures, this.world, this.fireballs, this.player);
     this.enemies = [this.enemy]; // add more imps here later; weapon already takes a list
+    this.viewModel = new ViewModel(this.renderer, textures.fire);
 
     this.hud = new Hud($('hud'), { hp: $('hp'), ammo: $('ammo'), kills: $('kills'), ai: $('ai'), fps: $('fps'), flash: $('flash') });
     this.overlay = new Overlay({ root: $('overlay'), title: $('ovTitle'), text: $('ovText'), button: $('goBtn') });
@@ -45,6 +47,7 @@ export class Game {
   _initRenderer() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(this._pixelRatio());
+    this.renderer.autoClear = false; // world and weapon are drawn in two passes
     $('stage').appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
@@ -119,6 +122,7 @@ export class Game {
     const h = THREE.MathUtils.degToRad(RENDER.fovHorizontal);
     this.camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(h / 2) / this.camera.aspect));
     this.camera.updateProjectionMatrix();
+    if (this.viewModel) this.viewModel.resize(this.camera.aspect);
     this.hud.resize();
   }
 
@@ -149,7 +153,10 @@ export class Game {
     const headBob = reduceMotion || !p.ground ? 0 : Math.sin(p.bob) * 0.05;
     this.camera.position.set(p.pos.x, p.pos.y + PLAYER.eyeHeight + headBob, p.pos.z);
     this.camera.rotation.set(p.pitch, p.yaw, 0);
+    this.renderer.clear();
     this.renderer.render(this.scene, this.camera);
+    this.viewModel.update(dt, p, this.weapon);
+    this.viewModel.render(this.renderer);
     this.hud.update(dt, p, this.weapon, this.enemy);
   }
 }

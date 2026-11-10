@@ -8,6 +8,16 @@ export const RENDER = {
   fogFar: 80
 };
 
+// First-person weapon model (js/viewmodel.js)
+export const VIEWMODEL = {
+  fov: 54,                          // separate from the world FOV so the gun keeps its shape
+  position: [0.15, -0.16, -0.38],   // right of centre, below and in front of the eye (metres)
+  yaw: -0.07,                       // slight turn toward the crosshair
+  bobAmount: 0.012,
+  swayAmount: 0.6,
+  recoilImpulse: 7
+};
+
 export const ARENA = {
   terrainSize: 170,
   terrainSegments: 85,

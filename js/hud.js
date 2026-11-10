@@ -1,7 +1,5 @@
-// HUD: pixel-art weapon and crosshair on a low-res canvas, plus the DOM status bar.
-import { reduceMotion } from './utils.js';
-
-const HUD_WIDTH = 320; // logical pixels; the canvas is upscaled with nearest-neighbour
+// HUD: crosshair on a native-resolution canvas, plus the DOM status bar.
+// The weapon itself is a 3D model (js/viewmodel.js).
 
 export class Hud {
   constructor(canvas, els) {
@@ -15,14 +13,14 @@ export class Hud {
   }
 
   resize() {
-    this.w = HUD_WIDTH;
-    this.h = Math.max(160, Math.round(HUD_WIDTH * innerHeight / innerWidth));
-    this.canvas.width = this.w;
-    this.canvas.height = this.h;
+    this.dpr = Math.min(devicePixelRatio || 1, 2);
+    this.canvas.width = Math.round(innerWidth * this.dpr);
+    this.canvas.height = Math.round(innerHeight * this.dpr);
+    this._drawCrosshair(0);
   }
 
   update(dt, player, weapon, enemy) {
-    this._draw(player, weapon);
+    this._drawCrosshair(weapon.recoil);
     this.els.flash.style.opacity = (player.hurtFlash * 0.9).toFixed(2);
 
     this.statusTimer -= dt;
@@ -42,38 +40,21 @@ export class Hud {
     }
   }
 
-  _draw(player, weapon) {
-    const g = this.ctx, w = this.w, h = this.h;
+  // Four short lines with a centre gap that opens up briefly after each shot.
+  _drawCrosshair(recoil) {
+    const g = this.ctx, d = this.dpr;
+    const w = this.canvas.width, h = this.canvas.height, cx = w / 2, cy = h / 2;
     g.clearRect(0, 0, w, h);
-    const r = (x, y, rw, rh, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), rw, rh); };
-
-    // crosshair
-    const cx = w / 2, cy = h / 2;
-    r(cx - 5, cy, 3, 1, '#ffd88a'); r(cx + 3, cy, 3, 1, '#ffd88a');
-    r(cx, cy - 5, 1, 3, '#ffd88a'); r(cx, cy + 3, 1, 3, '#ffd88a');
-
-    // weapon position with walk bob and recoil
-    const bx = reduceMotion ? 0 : Math.cos(player.bob * 0.5) * 5;
-    const by = reduceMotion ? 0 : Math.abs(Math.sin(player.bob * 0.5)) * 4;
-    // held to the right of the crosshair (modern style) so it never hides the target
-    const gx = cx + 62 + bx, gy = h - 30 + by + weapon.recoil * 14;
-
-    if (weapon.flash > 0) {
-      g.fillStyle = '#ff9a20'; g.beginPath();
-      g.moveTo(gx - 16, gy - 62); g.lineTo(gx, gy - 92); g.lineTo(gx + 16, gy - 62); g.lineTo(gx, gy - 54); g.fill();
-      g.fillStyle = '#fff3a8'; g.beginPath();
-      g.moveTo(gx - 8, gy - 62); g.lineTo(gx, gy - 80); g.lineTo(gx + 8, gy - 62); g.lineTo(gx, gy - 58); g.fill();
+    const gap = (5 + recoil * 6) * d, len = 7 * d;
+    g.lineCap = 'round';
+    for (const [stroke, width] of [['rgba(0,0,0,0.6)', 4 * d], ['#ffe2a8', 2 * d]]) {
+      g.strokeStyle = stroke; g.lineWidth = width;
+      g.beginPath();
+      g.moveTo(cx - gap - len, cy); g.lineTo(cx - gap, cy);
+      g.moveTo(cx + gap, cy); g.lineTo(cx + gap + len, cy);
+      g.moveTo(cx, cy - gap - len); g.lineTo(cx, cy - gap);
+      g.moveTo(cx, cy + gap); g.lineTo(cx, cy + gap + len);
+      g.stroke();
     }
-    // double barrel
-    r(gx - 8, gy - 62, 16, 3, '#18181c');
-    r(gx - 7, gy - 59, 6, 30, '#3a3a42'); r(gx + 1, gy - 59, 6, 30, '#3a3a42');
-    r(gx - 6, gy - 59, 2, 30, '#6c6c78'); r(gx + 2, gy - 59, 2, 30, '#6c6c78');
-    // wooden pump
-    r(gx - 11, gy - 36, 22, 11, '#7a4a22'); r(gx - 11, gy - 36, 22, 2, '#a06a34'); r(gx - 11, gy - 30, 22, 1, '#5a3418');
-    // receiver
-    r(gx - 13, gy - 25, 26, 40, '#2a2a30'); r(gx - 13, gy - 25, 26, 3, '#4c4c56');
-    // hands
-    r(gx - 24, gy - 33, 13, 10, '#c88a62'); r(gx - 24, gy - 25, 13, 2, '#8a5a3c');
-    r(gx + 9, gy - 14, 14, 18, '#c88a62'); r(gx + 9, gy - 14, 14, 2, '#e0a882'); r(gx + 9, gy - 2, 14, 2, '#8a5a3c');
   }
 }

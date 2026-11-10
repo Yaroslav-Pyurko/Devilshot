@@ -1,3 +1,7 @@
 import { Game } from './game.js';
 
-new Game().start();
+const game = new Game();
+game.start();
+
+// Handy for debugging from the browser console: devilshot.player.hp = 999
+window.devilshot = game;

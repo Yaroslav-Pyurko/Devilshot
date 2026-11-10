@@ -26,18 +26,32 @@ js/config.js        all tunable numbers and the wall layout
 js/world.js         terrain height field, sky, walls, collision, line of sight
 js/player.js        movement, gravity, jumping, health
 js/weapon.js        hitscan shotgun, ammo, muzzle flash, recoil
+js/viewmodel.js     3D chrome double-barrel model: own render pass, recoil, sway, bob, muzzle flash
 js/enemy.js         Imp sprite and its AI state machine (wander, chase, search)
 js/projectiles.js   enemy fireballs
 js/particles.js     hit puffs, blood, explosion sparks
-js/hud.js           pixel weapon + crosshair canvas, status bar
+js/hud.js           crosshair canvas, status bar
 js/input.js         keyboard, mouse, pointer lock
 js/overlay.js       start / pause / death screen
-js/textures.js      procedural pixel-art textures
+js/textures.js      texture loading/filtering, procedural imp sprite and particles
 js/audio.js         synthesized WebAudio sound effects
 js/utils.js         small helpers
 lib/three.module.js Three.js r128 (MIT, see lib/three.LICENSE.txt)
 assets/fonts/       Silkscreen and IBM Plex Sans (OFL)
+assets/textures/    512px seamless albedo + normal maps (generated)
+tools/gen_textures.py  regenerates assets/textures (Python, numpy + pillow)
 ```
+
+## Textures
+
+World textures are procedural and generated offline:
+
+```
+pip install numpy pillow
+python tools/gen_textures.py
+```
+
+Tweak colors, noise and brick layout in the script, rerun, refresh the browser.
 
 ## Where to extend
 
