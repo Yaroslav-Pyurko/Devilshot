@@ -1,7 +1,7 @@
 // All tunable numbers in one place. Change gameplay here, not in the systems.
 
 export const RENDER = {
-  scale: 0.42,          // internal resolution vs screen; lower = chunkier pixels, higher FPS
+  maxPixelRatio: 1.5,   // render at native resolution up to this devicePixelRatio; lower it if FPS drops
   fovHorizontal: 90,   // degrees, kept constant on any aspect ratio (modern shooters: 90-100)
   fogColor: 0x3b1a12,
   fogNear: 6,

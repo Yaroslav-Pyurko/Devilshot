@@ -23,7 +23,7 @@ export class Game {
     this.lastFrame = performance.now();
 
     this._initRenderer();
-    const textures = createTextures();
+    const textures = createTextures(this.renderer);
 
     this.world = new World(this.scene, textures);
     this.particles = new Particles(this.scene, textures.dot);
@@ -43,8 +43,8 @@ export class Game {
   }
 
   _initRenderer() {
-    this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-    this.renderer.setPixelRatio(RENDER.scale);
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    this.renderer.setPixelRatio(this._pixelRatio());
     $('stage').appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
@@ -108,8 +108,11 @@ export class Game {
     for (const e of this.enemies) e.reset();
   }
 
+  // Native resolution, capped so 4K / high-DPI screens keep a steady frame rate.
+  _pixelRatio() { return Math.min(devicePixelRatio || 1, RENDER.maxPixelRatio); }
+
   _resize() {
-    this.renderer.setPixelRatio(RENDER.scale);
+    this.renderer.setPixelRatio(this._pixelRatio());
     this.renderer.setSize(innerWidth, innerHeight);
     this.camera.aspect = innerWidth / innerHeight;
     // Three.js takes a vertical FOV; derive it so the horizontal FOV stays fixed.

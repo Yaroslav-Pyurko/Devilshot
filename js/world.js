@@ -20,16 +20,18 @@ export class World {
     this.losRay = new THREE.Raycaster();
     this._dir = new THREE.Vector3();
 
-    this.terrain = this._buildTerrain(textures.ground);
+    this.terrain = this._buildTerrain(textures);
     this._buildSky();
-    this.wallMaterial = new THREE.MeshLambertMaterial({ map: textures.wall });
+    this.wallMaterial = new THREE.MeshStandardMaterial({
+      map: textures.wall, normalMap: textures.wallNormal, roughness: 0.92, metalness: 0
+    });
     for (const w of WALLS) this.addWall(...w);
     this.solids = [...this.wallMeshes, this.terrain]; // everything bullets and sight lines stop at
   }
 
   heightAt(x, z) { return heightAt(x, z); }
 
-  _buildTerrain(tex) {
+  _buildTerrain(textures) {
     const g = new THREE.PlaneGeometry(ARENA.terrainSize, ARENA.terrainSize, ARENA.terrainSegments, ARENA.terrainSegments);
     g.rotateX(-Math.PI / 2);
     const p = g.attributes.position, cols = [];
@@ -37,11 +39,14 @@ export class World {
       const h = heightAt(p.getX(i), p.getZ(i));
       p.setY(i, h);
       const t = clamp((h + 3) / 13, 0, 1);
-      cols.push(0.62 + t * 0.4, 0.45 + t * 0.12, 0.36 - t * 0.06);
+      // subtle tint: valleys a bit darker and warmer, hilltops lighter and dustier
+      cols.push(0.82 + t * 0.22, 0.76 + t * 0.2, 0.72 + t * 0.2);
     }
     g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
     g.computeVertexNormals();
-    const mesh = new THREE.Mesh(g, new THREE.MeshPhongMaterial({ map: tex, vertexColors: true, flatShading: true, shininess: 0 }));
+    const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
+      map: textures.ground, normalMap: textures.groundNormal, vertexColors: true, roughness: 0.97, metalness: 0
+    }));
     this.scene.add(mesh);
     return mesh;
   }

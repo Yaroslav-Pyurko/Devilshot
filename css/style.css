@@ -26,9 +26,9 @@ body { background: var(--stone); color: var(--bone); font-family: var(--body); o
 #stage canvas, #hud {
   position: fixed; inset: 0;
   width: 100% !important; height: 100% !important;
-  image-rendering: pixelated; image-rendering: crisp-edges;
   display: block;
 }
+#hud { image-rendering: pixelated; image-rendering: crisp-edges; }
 #hud { pointer-events: none; }
 #flash { position: fixed; inset: 0; background: var(--blood); opacity: 0; pointer-events: none; mix-blend-mode: screen; }
 
