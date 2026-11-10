@@ -31,8 +31,8 @@ export const PLAYER = {
   radius: 0.4,
   // Quake 3 style movement: velocity with acceleration and friction instead of instant moves.
   // For reference Q3 runs at 320 units/s ~ 8 m/s; human walking pace is ~1.4 m/s.
-  walkSpeed: 5.5,       // default pace (m/s)
-  runSpeed: 8,          // with Shift
+  walkSpeed: 8.5,       // default pace (m/s)
+  runSpeed: 15,          // with Shift
   groundAccel: 10,      // Q3 pm_accelerate: how fast you reach top speed (~0.1 s)
   airAccel: 1,          // Q3 pm_airaccelerate: weak air control, enough for strafe-jumping
   friction: 6,          // Q3 pm_friction: how fast you stop (~0.15 s)
@@ -59,7 +59,7 @@ export const ENEMY = {
   start: { x: 0, z: -32 },
   maxHp: 100,
   radius: 0.6,
-  spriteSize: 1.9,     // imp height in metres (sprite art fills the full frame)
+  height: 1.9,         // imp height in metres (model is auto-scaled to it)
   eyeHeight: 1.6,      // where it looks from and throws fireballs
   sightRange: 50,
   closeSenseRange: 10,  // notices you from any direction inside this radius
