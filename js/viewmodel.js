@@ -238,13 +238,15 @@ export class ViewModel {
     this.kick += this.kickVel * dt;
 
     // walk bob: figure-eight, damped when standing or airborne
-    const moving = player.ground ? 1 : 0.2;
+    const moving = Math.min(1, player.speed / 8) * (player.ground ? 1 : 0.2);
     const bobAmt = reduceMotion ? 0 : VIEWMODEL.bobAmount * moving;
     const bx = Math.cos(player.bob * 0.5) * bobAmt;
     const by = -Math.abs(Math.sin(player.bob * 0.5)) * bobAmt * 0.7;
 
     const [px, py, pz] = VIEWMODEL.position;
-    this.root.position.set(px + bx - this.sway.x * 0.6, py + by + this.sway.y * 0.4 - this.kick * 0.02, pz + this.kick * 0.09);
+    // the gun also dips a little on landing, slightly more than the camera
+    const land = player.landOffset * 0.3;
+    this.root.position.set(px + bx - this.sway.x * 0.6, py + by + land + this.sway.y * 0.4 - this.kick * 0.02, pz + this.kick * 0.09);
     this.root.rotation.set(this.sway.y * 0.5 + this.kick * 0.35, VIEWMODEL.yaw + this.sway.x, -this.sway.x * 0.8);
 
     // muzzle flash

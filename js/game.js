@@ -150,8 +150,10 @@ export class Game {
 
   render(dt) {
     const p = this.player;
-    const headBob = reduceMotion || !p.ground ? 0 : Math.sin(p.bob) * 0.05;
-    this.camera.position.set(p.pos.x, p.pos.y + PLAYER.eyeHeight + headBob, p.pos.z);
+    // head bob scales with actual speed, so it fades in and out with acceleration
+    const speedK = Math.min(1, p.speed / PLAYER.runSpeed);
+    const headBob = reduceMotion || !p.ground ? 0 : Math.sin(p.bob) * PLAYER.headBob * speedK;
+    this.camera.position.set(p.pos.x, p.pos.y + PLAYER.eyeHeight + headBob + p.landOffset, p.pos.z);
     this.camera.rotation.set(p.pitch, p.yaw, 0);
     this.renderer.clear();
     this.renderer.render(this.scene, this.camera);

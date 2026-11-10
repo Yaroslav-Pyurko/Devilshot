@@ -29,10 +29,18 @@ export const PLAYER = {
   start: { x: 0, z: 24 },
   eyeHeight: 1.75,     // modern eye level; classic DOOM feel was ~1.6 with a 2.3 m imp
   radius: 0.4,
-  walkSpeed: 8,
-  runSpeed: 13,
-  jumpSpeed: 8.5,
-  gravity: 24,
+  // Quake 3 style movement: velocity with acceleration and friction instead of instant moves.
+  // For reference Q3 runs at 320 units/s ~ 8 m/s; human walking pace is ~1.4 m/s.
+  walkSpeed: 5.5,       // default pace (m/s)
+  runSpeed: 8,          // with Shift
+  groundAccel: 10,      // Q3 pm_accelerate: how fast you reach top speed (~0.1 s)
+  airAccel: 1,          // Q3 pm_airaccelerate: weak air control, enough for strafe-jumping
+  friction: 6,          // Q3 pm_friction: how fast you stop (~0.15 s)
+  stopSpeed: 2.5,       // below this speed friction acts as if at this speed, so you stop cleanly
+  jumpSpeed: 6.8,       // Q3 270 u/s
+  gravity: 20,          // Q3 800 u/s^2
+  headBob: 0.012,       // camera bob height in metres; 0 disables it (comfort)
+  landDip: true,        // short camera dip on hard landings
   maxHp: 100,
   startAmmo: 40,
   mouseSensitivity: 0.0022,
