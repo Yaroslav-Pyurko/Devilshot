@@ -1,5 +1,6 @@
 // HUD: crosshair on a native-resolution canvas, plus the DOM status bar.
 // The weapon itself is a 3D model (js/viewmodel.js).
+import { HUD } from './config.js';
 
 export class Hud {
   constructor(canvas, els) {
@@ -40,7 +41,7 @@ export class Hud {
     }
   }
 
-  // Four short lines with a centre gap that opens up briefly after each shot.
+  // Four short lines with a centre gap that opens up briefly after each shot, plus a centre dot.
   _drawCrosshair(recoil) {
     const g = this.ctx, d = this.dpr;
     const w = this.canvas.width, h = this.canvas.height, cx = w / 2, cy = h / 2;
@@ -55,6 +56,13 @@ export class Hud {
       g.moveTo(cx, cy - gap - len); g.lineTo(cx, cy - gap);
       g.moveTo(cx, cy + gap); g.lineTo(cx, cy + gap + len);
       g.stroke();
+    }
+    // centre dot never moves, even while the lines open up after a shot
+    if (HUD.comfortDot) {
+      g.fillStyle = 'rgba(0,0,0,0.6)';
+      g.beginPath(); g.arc(cx, cy, 2.6 * d, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#ffe2a8';
+      g.beginPath(); g.arc(cx, cy, 1.6 * d, 0, Math.PI * 2); g.fill();
     }
   }
 }

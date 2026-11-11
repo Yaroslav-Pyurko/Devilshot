@@ -8,6 +8,11 @@ export const RENDER = {
   fogFar: 80
 };
 
+// Crosshair (js/hud.js)
+export const HUD = {
+  comfortDot: true      // fixed dot in the centre: a steady reference point that helps against motion sickness
+};
+
 // First-person weapon model (js/viewmodel.js)
 export const VIEWMODEL = {
   fov: 54,                          // separate from the world FOV so the gun keeps its shape
