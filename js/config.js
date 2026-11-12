@@ -10,7 +10,10 @@ export const RENDER = {
 
 // Crosshair (js/hud.js)
 export const HUD = {
-  comfortDot: true      // fixed dot in the centre: a steady reference point that helps against motion sickness
+  comfortDot: true,     // fixed dot in the centre: a steady reference point that helps against motion sickness
+  crosshairGap: 10,     // distance from the centre to each line, in CSS pixels
+  crosshairLength: 7,   // length of each line
+  recoilSpread: 6       // how far the lines open up right after a shot
 };
 
 // First-person weapon model (js/viewmodel.js)

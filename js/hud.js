@@ -46,7 +46,7 @@ export class Hud {
     const g = this.ctx, d = this.dpr;
     const w = this.canvas.width, h = this.canvas.height, cx = w / 2, cy = h / 2;
     g.clearRect(0, 0, w, h);
-    const gap = (5 + recoil * 6) * d, len = 7 * d;
+    const gap = (HUD.crosshairGap + recoil * HUD.recoilSpread) * d, len = HUD.crosshairLength * d;
     g.lineCap = 'round';
     for (const [stroke, width] of [['rgba(0,0,0,0.6)', 4 * d], ['#ffe2a8', 2 * d]]) {
       g.strokeStyle = stroke; g.lineWidth = width;
