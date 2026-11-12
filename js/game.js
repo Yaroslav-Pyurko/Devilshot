@@ -36,7 +36,7 @@ export class Game {
     this.viewModel = new ViewModel(this.renderer, textures.fire);
 
     this.hud = new Hud($('hud'), { hp: $('hp'), ammo: $('ammo'), kills: $('kills'), ai: $('ai'), fps: $('fps'), flash: $('flash') });
-    this.overlay = new Overlay({ root: $('overlay'), title: $('ovTitle'), text: $('ovText'), button: $('goBtn') });
+    this.overlay = new Overlay({ root: $('overlay'), title: $('ovTitle'), text: $('ovText'), button: $('goBtn'), sens: $('sens'), sensValue: $('sensValue') });
     this.input = new Input(this.renderer.domElement);
 
     this._wireEvents();

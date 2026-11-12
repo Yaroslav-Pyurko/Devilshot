@@ -3,6 +3,7 @@ import * as THREE from '../lib/three.module.js';
 import { ARENA, PLAYER } from './config.js';
 import { clamp } from './utils.js';
 import { sfx } from './audio.js';
+import { settings } from './settings.js';
 
 export class Player {
   constructor(world) {
@@ -34,8 +35,9 @@ export class Player {
   eye(out) { return out.set(this.pos.x, this.pos.y + PLAYER.eyeHeight, this.pos.z); }
 
   look(dx, dy) {
-    this.yaw -= dx * PLAYER.mouseSensitivity;
-    this.pitch = clamp(this.pitch - dy * PLAYER.mouseSensitivity, -PLAYER.maxPitch, PLAYER.maxPitch);
+    const k = PLAYER.mouseSensitivity * settings.sensitivity;
+    this.yaw -= dx * k;
+    this.pitch = clamp(this.pitch - dy * k, -PLAYER.maxPitch, PLAYER.maxPitch);
   }
 
   // Quake 3 style movement (PM_Friction / PM_Accelerate / PM_AirMove), in metres.

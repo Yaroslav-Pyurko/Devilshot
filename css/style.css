@@ -69,6 +69,17 @@ body { background: var(--stone); color: var(--bone); font-family: var(--body); o
   background: #000; padding: 2px 6px; border: 1px solid #4a3a32;
   white-space: nowrap; justify-self: start;
 }
+.settings {
+  display: grid; grid-template-columns: auto 1fr 3.5em; gap: 12px; align-items: center;
+  padding: 10px 12px; background: rgba(0, 0, 0, 0.45); border: 1px solid #4a3a32;
+  cursor: default; font-size: 14px;
+}
+.settings label { color: var(--ash); white-space: nowrap; }
+.settings output { font-family: var(--display); color: var(--ember); text-align: right; font-variant-numeric: tabular-nums; }
+.settings input[type="range"] { width: 100%; min-width: 0; accent-color: var(--ember); cursor: pointer; }
+.settings input[type="range"]:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
+@media (max-width: 420px) { .settings { grid-template-columns: 1fr 3.5em; } .settings label { grid-column: 1 / -1; } }
+
 .go { font-family: var(--display); font-size: 16px; color: #000; background: var(--ember); padding: 10px 14px; justify-self: start; border: 0; cursor: pointer; }
 .go:focus-visible { outline: 3px solid var(--bone); outline-offset: 3px; }
 .note { font-size: 12px; color: var(--ash); }

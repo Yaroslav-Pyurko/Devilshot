@@ -33,7 +33,8 @@ js/projectiles.js   enemy fireballs
 js/particles.js     hit puffs, blood, explosion sparks
 js/hud.js           crosshair canvas, status bar
 js/input.js         keyboard, mouse, pointer lock
-js/overlay.js       start / pause / death screen
+js/overlay.js       start / pause / death screen, mouse sensitivity slider
+js/settings.js      player settings saved in the browser (localStorage)
 js/textures.js      texture loading/filtering, particle sprites
 js/audio.js         synthesized WebAudio sound effects
 js/utils.js         small helpers
