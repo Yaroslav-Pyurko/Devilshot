@@ -42,7 +42,8 @@ js/audio.js         synthesized WebAudio sound effects
 js/utils.js         small helpers
 lib/three.module.js Three.js r128 (MIT, see lib/three.LICENSE.txt)
 assets/fonts/       Rubik (display) and IBM Plex Sans (+ Hebrew), split by script; OFL licences included
-assets/textures/    512px seamless albedo + normal maps: lava ground (+ glow map), bricks, concrete (generated)
+assets/textures/    512px seamless albedo + normal maps: sand, lava (+ glow map), bricks, concrete (generated)
+assets/sounds/      recorded samples (jump.mp3: trimmed, mono 22 kHz, ~2 KB); other effects are synthesized in js/audio.js
 tools/gen_textures.py  regenerates assets/textures (Python, numpy + pillow)
 ```
 
@@ -62,4 +63,5 @@ Tweak colors, noise and brick layout in the script, rerun, refresh the browser.
 - Gameplay tuning: `js/config.js`.
 - More enemies: create more `Imp` instances in `Game` and push them to `this.enemies`.
 - Level layout: `WALLS` and `STRUCTURES` (bridges, ramps) in `js/config.js`, terrain shape in `heightAt()` in `js/world.js`.
+- Lava pools and their damage: `LAVA` in `js/config.js` (pools sit in terrain basins, radius is found automatically).
 - Better pathfinding: replace `Imp._move()` steering with A* over a grid built from `world.blocked()`.
