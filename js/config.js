@@ -26,6 +26,19 @@ export const VIEWMODEL = {
   recoilImpulse: 7
 };
 
+// Sky dome (js/sky.js): colours and cloud motion
+export const SKY = {
+  zenith: 0x2e0e0e,       // overhead: dark crimson
+  horizon: 0x5a1c10,      // low sky: smouldering red
+  glow: 0x7a2a0c,         // fiery band right at the horizon
+  cloudDark: 0x0e0505,    // storm clouds: darker than the sky so they read as silhouettes
+  cloudLit: 0xd2561e,     // cloud edges lit by fire from below
+  wisp: 0x8a3a24,         // thin fast wisps in the upper layer
+  wind: [0.24, 0.1],      // cloud drift direction and base speed (dome units per second)
+  speed: 1.0,             // overall cloud speed multiplier: raise it for a wilder sky
+  wispSpeedRatio: 1.9     // the upper wisps move this much faster than the main clouds
+};
+
 export const ARENA = {
   terrainSize: 170,
   terrainSegments: 85,

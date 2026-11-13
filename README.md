@@ -24,6 +24,7 @@ js/main.js          entry point
 js/game.js          wires the systems, owns renderer/scene/camera and the main loop
 js/config.js        all tunable numbers and the wall layout
 js/world.js         terrain, walls, concrete bridges and ramps; 3D box collision with ramps, floors, ceilings, line of sight
+js/sky.js           Quake 3 style sky dome: two layers of fast scrolling procedural clouds (shader)
 js/player.js        movement, gravity, jumping, health
 js/weapon.js        hitscan shotgun, ammo, muzzle flash, recoil
 js/viewmodel.js     3D chrome double-barrel model: own render pass, recoil, sway, bob, muzzle flash

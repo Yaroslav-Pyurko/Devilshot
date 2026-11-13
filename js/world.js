@@ -6,6 +6,7 @@
 import * as THREE from '../lib/three.module.js';
 import { ARENA, WALLS, STRUCTURES } from './config.js';
 import { clamp } from './utils.js';
+import { Sky } from './sky.js';
 
 export const STEP_HEIGHT = 0.45; // ledges up to this high are stepped onto, not blocked by
 export const BODY_HEIGHT = 1.95; // collision height: head plus room above the camera (eye at 1.75), player and imp alike
@@ -59,7 +60,7 @@ export class World {
     this._dir = new THREE.Vector3();
 
     this.terrain = this._buildTerrain(textures);
-    this._buildSky();
+    this.sky = new Sky(scene);
     this.wallMaterial = new THREE.MeshStandardMaterial({
       map: textures.wall, normalMap: textures.wallNormal, roughness: 0.92, metalness: 0
     });
@@ -95,16 +96,6 @@ export class World {
     }));
     this.scene.add(mesh);
     return mesh;
-  }
-
-  _buildSky() {
-    const g = new THREE.SphereGeometry(400, 16, 10), p = g.attributes.position, cols = [];
-    for (let i = 0; i < p.count; i++) {
-      const t = clamp(p.getY(i) / 400, 0, 1);
-      cols.push(0.23 - 0.15 * t, 0.10 - 0.07 * t, 0.07 - 0.02 * t);
-    }
-    g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
-    this.scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false })));
   }
 
   // ---------- level building ----------
