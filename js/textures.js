@@ -34,8 +34,8 @@ export function createTextures(renderer) {
 
   const ground = loadTexture(loader, 'ground_albedo.png', anisotropy);
   const groundNormal = loadTexture(loader, 'ground_normal.png', anisotropy);
-  ground.repeat.set(40, 40);
-  groundNormal.repeat.set(40, 40);
+  const groundEmissive = loadTexture(loader, 'ground_emissive.png', anisotropy);
+  for (const t of [ground, groundNormal, groundEmissive]) t.repeat.set(40, 40);
 
   const wall = loadTexture(loader, 'bricks_albedo.png', anisotropy);
   const wallNormal = loadTexture(loader, 'bricks_normal.png', anisotropy);
@@ -56,5 +56,5 @@ export function createTextures(renderer) {
     g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
   });
 
-  return { ground, groundNormal, wall, wallNormal, concrete, concreteNormal, dot, fire };
+  return { ground, groundNormal, groundEmissive, wall, wallNormal, concrete, concreteNormal, dot, fire };
 }

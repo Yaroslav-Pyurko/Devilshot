@@ -1,7 +1,7 @@
 """
 Generates the seamless world textures used by the game:
 
-  assets/textures/ground_albedo.png   ground_normal.png
+  assets/textures/ground_albedo.png   ground_normal.png   ground_emissive.png   (cracked lava crust)
   assets/textures/bricks_albedo.png   bricks_normal.png
   assets/textures/concrete_albedo.png concrete_normal.png
 
@@ -10,7 +10,8 @@ Noise is built in the frequency domain, so every texture tiles perfectly.
 
 Usage (from the project root):
     pip install numpy pillow
-    python tools/gen_textures.py
+    python tools/gen_textures.py              # everything
+    python tools/gen_textures.py lava         # only some: lava, bricks, concrete
 """
 from pathlib import Path
 
@@ -175,7 +176,67 @@ def concrete():
     save("concrete_normal.png", normal_map(height, 5.0))
 
 
+# ---------- lava crust: black cooled plates split by glowing red cracks ----------
+
+def worley_edges(size, n, rand, warp=None):
+    """Tileable Voronoi: distance to the border between the two nearest cells (F2 - F1), in tile units."""
+    y, x = np.mgrid[0:size, 0:size] / size
+    if warp is not None:
+        x = (x + warp[0]) % 1.0
+        y = (y + warp[1]) % 1.0
+    pts = rand.uniform(0, 1, (n, 2))
+    f1 = np.full((size, size), 9.0)
+    f2 = np.full((size, size), 9.0)
+    for px, py in pts:
+        dx = np.abs(x - px); dx = np.minimum(dx, 1 - dx)
+        dy = np.abs(y - py); dy = np.minimum(dy, 1 - dy)
+        d = np.sqrt(dx * dx + dy * dy)
+        f2 = np.where(d < f1, f1, np.minimum(f2, d))
+        f1 = np.minimum(f1, d)
+    return f2 - f1
+
+
+def lava_ground():
+    rand = np.random.default_rng(666)
+    # wobble the cell borders so cracks are jagged, not straight Voronoi lines
+    warp = (tileable_noise(SIZE, 6, 4) * 0.012 + tileable_noise(SIZE, 24, 6) * 0.004,
+            tileable_noise(SIZE, 6, 4) * 0.012 + tileable_noise(SIZE, 24, 6) * 0.004)
+    big = worley_edges(SIZE, 22, rand, warp)          # main plates, ~1 m across in game
+    small = worley_edges(SIZE, 150, rand, warp)       # secondary cracks splitting the plates
+    width = 0.0045 + 0.004 * (tileable_noise(SIZE, 10, 6) * 0.5 + 0.5).clip(0, 1)
+
+    main = np.clip(1 - big / width, 0, 1)                                   # wide glowing cracks
+    halo = np.exp(-big / 0.012) * 0.35                                      # heat bleeding into the crust
+    patch = np.clip(tileable_noise(SIZE, 5, 6) * 0.6 + 0.35, 0, 1)          # secondary cracks only in places
+    second = np.clip(1 - small / 0.0022, 0, 1) * patch * 0.75
+    hair_src = tileable_noise(SIZE, 70, 6)                                  # hairline crazing inside plates
+    hair = np.clip(1 - np.abs(hair_src) / 0.06, 0, 1) * np.clip(tileable_noise(SIZE, 14, 6) - 0.2, 0, 1) * 0.35
+
+    glow = np.clip(main + second + hair, 0, 1)
+    heat = np.clip(main * 1.0 + halo, 0, 1)
+
+    # crust: near-black basalt with slight brown variation, darker right at the edges
+    blot = fbm(SIZE, base=4, octaves=5)
+    crust = lerp(np.array([16, 12, 11], float), np.array([42, 30, 26], float), blot)
+    crust *= (0.85 + 0.3 * fbm(SIZE, base=40, octaves=3))[..., None]
+    col = lerp(crust, np.array([60, 10, 6], float), np.clip(glow + halo * 0.5, 0, 1))
+
+    # emissive: deep red, the widest cracks run hotter toward orange
+    emit = lerp(np.array([0, 0, 0], float), np.array([235, 22, 8], float), glow)
+    emit = lerp(emit, np.array([255, 120, 40], float), np.clip(main - 0.6, 0, 1) * 0.8)
+    emit += np.array([90, 8, 2], float) * halo[..., None]
+
+    # relief: plates are raised slabs that round off toward the cracks
+    plate = np.clip(big / 0.03, 0, 1) ** 0.5
+    height = plate * 0.8 - second * 0.3 - hair * 0.15 + fbm(SIZE, base=24, octaves=4) * 0.12
+
+    save("ground_albedo.png", col.clip(0, 255).astype(np.uint8))
+    save("ground_emissive.png", emit.clip(0, 255).astype(np.uint8))
+    save("ground_normal.png", normal_map(height, 6.0))
+
+
 if __name__ == "__main__":
-    ground()
-    bricks()
-    concrete()
+    import sys
+    jobs = {"lava": lava_ground, "bricks": bricks, "concrete": concrete}
+    for name in (sys.argv[1:] or list(jobs)):
+        jobs[name]()

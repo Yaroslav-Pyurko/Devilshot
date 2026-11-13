@@ -42,7 +42,7 @@ js/audio.js         synthesized WebAudio sound effects
 js/utils.js         small helpers
 lib/three.module.js Three.js r128 (MIT, see lib/three.LICENSE.txt)
 assets/fonts/       Rubik (display) and IBM Plex Sans (+ Hebrew), split by script; OFL licences included
-assets/textures/    512px seamless albedo + normal maps: ground, bricks, concrete (generated)
+assets/textures/    512px seamless albedo + normal maps: lava ground (+ glow map), bricks, concrete (generated)
 tools/gen_textures.py  regenerates assets/textures (Python, numpy + pillow)
 ```
 

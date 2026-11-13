@@ -4,7 +4,7 @@
 // overlaps it, so you can walk under a bridge, stand on it, or step onto a low ledge.
 // A box may have a sloped top (ramps): its height then changes linearly along one axis.
 import * as THREE from '../lib/three.module.js';
-import { ARENA, WALLS, STRUCTURES } from './config.js';
+import { ARENA, WALLS, STRUCTURES, GROUND } from './config.js';
 import { clamp } from './utils.js';
 import { Sky } from './sky.js';
 
@@ -92,7 +92,9 @@ export class World {
     g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
     g.computeVertexNormals();
     const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
-      map: textures.ground, normalMap: textures.groundNormal, vertexColors: true, roughness: 0.97, metalness: 0
+      map: textures.ground, normalMap: textures.groundNormal, vertexColors: true, roughness: 0.9, metalness: 0,
+      // lava cracks glow on their own, in shadow too
+      emissiveMap: textures.groundEmissive, emissive: 0xffffff, emissiveIntensity: GROUND.glow
     }));
     this.scene.add(mesh);
     return mesh;

@@ -26,6 +26,11 @@ export const VIEWMODEL = {
   recoilImpulse: 7
 };
 
+// Ground: cooled lava crust with glowing cracks (textures from tools/gen_textures.py lava)
+export const GROUND = {
+  glow: 1.0               // brightness of the lava cracks; 0 turns the glow off
+};
+
 // Sky dome (js/sky.js): colours and cloud motion
 export const SKY = {
   zenith: 0x2e0e0e,       // overhead: dark crimson
