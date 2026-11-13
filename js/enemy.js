@@ -45,6 +45,7 @@ export class Imp {
 
   placeAt(x, z) {
     this.pos.set(x, this.world.heightAt(x, z), z);
+    this.vy = 0;
     this.hp = ENEMY.maxHp;
     this.alive = true;
     this.state = AI_STATE.WANDER;
@@ -155,7 +156,8 @@ export class Imp {
           speed = ENEMY.strafeSpeed;
         }
         const busy = this.throwT >= 0 || this.meleeT >= 0;
-        if (!busy && dist < ENEMY.meleeRange && this.meleeCooldown <= 0) {
+        const sameLevel = Math.abs(this.player.pos.y - this.pos.y) < 1.5; // can't claw you on a pillar
+        if (!busy && sameLevel && dist < ENEMY.meleeRange && this.meleeCooldown <= 0) {
           this.meleeT = 0;
           this.meleeCooldown = ENEMY.meleeCooldown;
           this.attackAnim = MELEE_TIME;
@@ -198,6 +200,7 @@ export class Imp {
         [gx, gz] = [gx * c - gz * s, gx * s + gz * c];
       }
       const step = speed * dt;
+      this.world.pushOut(this.pos, ENEMY.radius);
       const moved = this.world.slide(this.pos, gx * step, gz * step, ENEMY.radius);
       if (moved < step * 0.3 && this.steerTimer <= 0) {
         this.steerTimer = 0.8;
@@ -211,8 +214,13 @@ export class Imp {
     // Don't walk into the player.
     const p = this.player.pos;
     const nx = this.pos.x - p.x, nz = this.pos.z - p.z, nd = Math.hypot(nx, nz);
-    if (nd < 1.1 && nd > 0.001) { this.pos.x = p.x + nx / nd * 1.1; this.pos.z = p.z + nz / nd * 1.1; }
-    this.pos.y = this.world.heightAt(this.pos.x, this.pos.z);
+    if (nd < 1.1 && nd > 0.001 && Math.abs(p.y - this.pos.y) < 1.5) { this.pos.x = p.x + nx / nd * 1.1; this.pos.z = p.z + nz / nd * 1.1; }
+    // follow the floor: walk up ramps and across bridges, fall off edges
+    const floor = this.world.floorAt(this.pos.x, this.pos.z, this.pos.y, ENEMY.radius);
+    if (this.pos.y - floor > 0.5) {
+      this.vy -= 22 * dt;
+      this.pos.y = Math.max(floor, this.pos.y + this.vy * dt);
+    } else { this.pos.y = floor; this.vy = 0; }
   }
 
   // Advance attack animations and fire their effects at the right moment.
@@ -232,7 +240,7 @@ export class Imp {
       const hitAt = MELEE_TIME * MELEE_HIT;
       if (before < hitAt && this.meleeT >= hitAt) {
         const p = this.player.pos;
-        if (Math.hypot(p.x - this.pos.x, p.z - this.pos.z) < ENEMY.meleeRange + 0.4) this.player.hurt(ENEMY.meleeDamage);
+        if (Math.hypot(p.x - this.pos.x, p.z - this.pos.z) < ENEMY.meleeRange + 0.4 && Math.abs(p.y - this.pos.y) < 1.5) this.player.hurt(ENEMY.meleeDamage);
       }
       if (this.meleeT >= MELEE_TIME) this.meleeT = -1;
     }

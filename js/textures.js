@@ -39,6 +39,8 @@ export function createTextures(renderer) {
 
   const wall = loadTexture(loader, 'bricks_albedo.png', anisotropy);
   const wallNormal = loadTexture(loader, 'bricks_normal.png', anisotropy);
+  const concrete = loadTexture(loader, 'concrete_albedo.png', anisotropy);
+  const concreteNormal = loadTexture(loader, 'concrete_normal.png', anisotropy);
 
   // soft round particle
   const dot = canvasTexture(32, 32, g => {
@@ -54,5 +56,5 @@ export function createTextures(renderer) {
     g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
   });
 
-  return { ground, groundNormal, wall, wallNormal, dot, fire };
+  return { ground, groundNormal, wall, wallNormal, concrete, concreteNormal, dot, fire };
 }

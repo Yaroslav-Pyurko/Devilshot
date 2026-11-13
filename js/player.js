@@ -4,6 +4,7 @@ import { ARENA, PLAYER } from './config.js';
 import { clamp } from './utils.js';
 import { sfx } from './audio.js';
 import { settings } from './settings.js';
+import { BODY_HEIGHT } from './world.js';
 
 export class Player {
   constructor(world) {
@@ -65,22 +66,25 @@ export class Player {
     }
 
     // move horizontally; hitting a wall kills the velocity into it so we slide along it
-    const dx = this.vel.x * dt, dz = this.vel.z * dt;
-    if (this.world.blocked(this.pos.x + dx, this.pos.z, PLAYER.radius)) this.vel.x = 0; else this.pos.x += dx;
-    if (this.world.blocked(this.pos.x, this.pos.z + dz, PLAYER.radius)) this.vel.z = 0; else this.pos.z += dz;
+    const dx = this.vel.x * dt, dz = this.vel.z * dt, r = PLAYER.radius, feet = this.pos.y;
+    this.world.pushOut(this.pos, r);
+    if (this.world.blocked(this.pos.x + dx, this.pos.z, r, feet)) this.vel.x = 0; else this.pos.x += dx;
+    if (this.world.blocked(this.pos.x, this.pos.z + dz, r, feet)) this.vel.z = 0; else this.pos.z += dz;
     if (Math.abs(this.pos.x) > ARENA.limit) { this.pos.x = clamp(this.pos.x, -ARENA.limit, ARENA.limit); this.vel.x = 0; }
     if (Math.abs(this.pos.z) > ARENA.limit) { this.pos.z = clamp(this.pos.z, -ARENA.limit, ARENA.limit); this.vel.z = 0; }
 
     this.speed = Math.hypot(this.vel.x, this.vel.z);
     if (this.ground) this.bob += dt * this.speed * 1.1; // step cycle follows actual speed
 
-    // vertical: gravity, landing, and sticking to the ground on downhill slopes
-    const g = this.world.heightAt(this.pos.x, this.pos.z);
+    // vertical: gravity, head bumps, landing on terrain, ramps and bridges
     const wasGround = this.ground, fallSpeed = this.vy;
     this.vy -= PLAYER.gravity * dt;
+    const ceiling = this.world.ceilingAt(this.pos.x, this.pos.z, this.pos.y, PLAYER.radius);
     this.pos.y += this.vy * dt;
-    if (this.pos.y <= g || (this.ground && this.pos.y - g < 0.5 && this.vy <= 0)) {
-      this.pos.y = g; this.vy = 0; this.ground = true;
+    if (this.vy > 0 && this.pos.y + BODY_HEIGHT > ceiling) { this.pos.y = ceiling - BODY_HEIGHT; this.vy = 0; }
+    const floor = this.world.floorAt(this.pos.x, this.pos.z, this.pos.y, PLAYER.radius);
+    if (this.pos.y <= floor || (this.ground && this.pos.y - floor < 0.5 && this.vy <= 0)) {
+      this.pos.y = floor; this.vy = 0; this.ground = true;
       if (!wasGround) this._land(fallSpeed);
     } else this.ground = false;
   }

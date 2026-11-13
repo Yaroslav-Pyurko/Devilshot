@@ -100,5 +100,21 @@ export const WALLS = [
   [0, -60, 122, 2, 7], [0, 60, 122, 2, 7], [-60, 0, 2, 122, 7], [60, 0, 2, 122, 7],
   [-8, -6, 10, 1.5, 4], [8, 6, 10, 1.5, 4], [0, -16, 1.5, 10, 4],
   [14, -12, 6, 6, 5], [-15, 12, 6, 6, 5], [25, 20, 1.5, 14, 5], [-28, -24, 14, 1.5, 5],
-  [30, -30, 4, 4, 8], [-34, 30, 4, 4, 8], [-40, -2, 1.5, 12, 5], [40, 4, 10, 1.5, 5]
+  [-40, 8, 1.5, 12, 5], [40, 4, 10, 1.5, 5]   // (-40, 8) moved off the bridge line
 ];
+
+// Concrete bridges and ramps in the Quake 3 spirit: no railings, run straight up and across.
+// Points are [x, z] in metres, heights are absolute. Bridges and ramps must be axis-aligned.
+export const STRUCTURES = {
+  bridges: [
+    // `from` / `to` are the centres of the two ends of the deck
+    // decks must only touch, never overlap: two coplanar tops in the same spot flicker (z-fighting)
+    { from: [-52, -6], to: [10, -6], width: 4, top: 7.5, supportEvery: 16 },   // across the map, ends at the north bridge's edge
+    { from: [12, -8], to: [12, 52], width: 4, top: 7.5, supportEvery: 16 }     // turns north at the corner
+  ],
+  ramps: [
+    // `from` is the low end on the ground, `to` the high end touching a bridge edge
+    { from: [-24, 14], to: [-24, -4], width: 4, top: 7.5 },   // south side, up to the long bridge (~30°)
+    { from: [-4, 18], to: [10, 18], width: 4, top: 7.5 }      // west side, up to the north bridge (~27°)
+  ]
+};

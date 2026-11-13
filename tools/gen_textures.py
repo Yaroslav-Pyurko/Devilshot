@@ -3,6 +3,7 @@ Generates the seamless world textures used by the game:
 
   assets/textures/ground_albedo.png   ground_normal.png
   assets/textures/bricks_albedo.png   bricks_normal.png
+  assets/textures/concrete_albedo.png concrete_normal.png
 
 Everything is procedural (no third-party art, no licensing questions).
 Noise is built in the frequency domain, so every texture tiles perfectly.
@@ -142,6 +143,39 @@ def bricks():
     save("bricks_normal.png", normal_map(height, 9.0))
 
 
+# ---------- concrete: cast slabs for bridges and ramps, 2 x 2 panels per tile ----------
+
+def concrete():
+    y, x = np.mgrid[0:SIZE, 0:SIZE] / SIZE
+    panels = 2
+    fx = (x * panels) % 1.0
+    fy = (y * panels) % 1.0
+    edge = np.minimum(np.minimum(fx, 1 - fx), np.minimum(fy, 1 - fy))
+    seam = np.clip(1 - edge / 0.008, 0, 1)                      # thin recessed joint between slabs
+    near_seam = np.clip(1 - edge / 0.08, 0, 1)                  # grime collects along the joints
+
+    blotch = fbm(SIZE, base=3, octaves=5)
+    grain = fbm(SIZE, base=32, octaves=4)
+    pores = np.clip((tileable_noise(SIZE, 90, 8) - 2.0) * 1.5, 0, 1)
+    pid = (np.floor(x * panels) + np.floor(y * panels) * panels).astype(int)
+    per_panel = rng.uniform(-0.06, 0.06, panels * panels)[pid]  # each slab poured slightly differently
+    # faint horizontal formwork lines
+    form = (np.sin(y * 2 * np.pi * 24) * 0.5 + 0.5) ** 8 * 0.06
+
+    height = 0.6 + grain * 0.15 - pores * 0.5 - seam * 0.6 - form
+
+    light = np.array([150, 138, 124], float)
+    dark = np.array([96, 84, 74], float)
+    col = lerp(dark, light, np.clip(blotch * 1.2 - 0.1 + per_panel, 0, 1))
+    col *= (0.9 + 0.2 * grain)[..., None]
+    col = lerp(col, np.array([70, 40, 30], float), near_seam * 0.35 * blotch)   # rusty-red dirt in the joints
+    col *= (1 - pores * 0.35 - seam * 0.45 - form)[..., None]
+
+    save("concrete_albedo.png", col.clip(0, 255).astype(np.uint8))
+    save("concrete_normal.png", normal_map(height, 5.0))
+
+
 if __name__ == "__main__":
     ground()
     bricks()
+    concrete()
