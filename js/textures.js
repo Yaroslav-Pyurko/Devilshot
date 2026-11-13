@@ -34,8 +34,11 @@ export function createTextures(renderer) {
 
   const ground = loadTexture(loader, 'ground_albedo.png', anisotropy);
   const groundNormal = loadTexture(loader, 'ground_normal.png', anisotropy);
-  const groundEmissive = loadTexture(loader, 'ground_emissive.png', anisotropy);
-  for (const t of [ground, groundNormal, groundEmissive]) t.repeat.set(40, 40);
+  for (const t of [ground, groundNormal]) t.repeat.set(40, 40);
+  // lava pools: one tile covers ~4 m, the pool mesh scales its UVs to match
+  const lava = loadTexture(loader, 'lava_albedo.png', anisotropy);
+  const lavaNormal = loadTexture(loader, 'lava_normal.png', anisotropy);
+  const lavaEmissive = loadTexture(loader, 'lava_emissive.png', anisotropy);
 
   const wall = loadTexture(loader, 'bricks_albedo.png', anisotropy);
   const wallNormal = loadTexture(loader, 'bricks_normal.png', anisotropy);
@@ -56,5 +59,5 @@ export function createTextures(renderer) {
     g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
   });
 
-  return { ground, groundNormal, groundEmissive, wall, wallNormal, concrete, concreteNormal, dot, fire };
+  return { ground, groundNormal, lava, lavaNormal, lavaEmissive, wall, wallNormal, concrete, concreteNormal, dot, fire };
 }

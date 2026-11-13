@@ -1,6 +1,6 @@
 // Player state, first-person movement, gravity and damage.
 import * as THREE from '../lib/three.module.js';
-import { ARENA, PLAYER } from './config.js';
+import { ARENA, PLAYER, LAVA } from './config.js';
 import { clamp } from './utils.js';
 import { sfx } from './audio.js';
 import { settings } from './settings.js';
@@ -23,6 +23,7 @@ export class Player {
     this.ground = true;
     this.landOffset = 0; // camera dip after landing (metres, negative = down)
     this.landVel = 0;
+    this.lavaTimer = 0;  // time until the next lava damage step
     this.yaw = 0;
     this.pitch = 0;
     this.hp = PLAYER.maxHp;
@@ -60,7 +61,7 @@ export class Player {
     if (this.ground) {
       this._friction(dt);
       this._accelerate(wx, wz, wishSpeed, PLAYER.groundAccel, dt);
-      if (input.down('Space')) { this.vy = PLAYER.jumpSpeed; this.ground = false; }
+      if (input.down('Space')) { this.vy = PLAYER.jumpSpeed; this.ground = false; sfx.jump(); }
     } else {
       this._accelerate(wx, wz, wishSpeed, PLAYER.airAccel, dt);
     }
@@ -87,6 +88,15 @@ export class Player {
       this.pos.y = floor; this.vy = 0; this.ground = true;
       if (!wasGround) this._land(fallSpeed);
     } else this.ground = false;
+
+    // lava burns while you stand in it: first step right away, then every damageTick
+    if (this.world.lavaAt(this.pos)) {
+      this.lavaTimer -= dt;
+      if (this.lavaTimer <= 0) {
+        this.lavaTimer += LAVA.damageTick;
+        this.hurt(Math.round(LAVA.damagePerSecond * LAVA.damageTick));
+      }
+    } else this.lavaTimer = 0;
   }
 
   // Q3 PM_Friction: slow down proportionally, but never slower than stopSpeed allows.

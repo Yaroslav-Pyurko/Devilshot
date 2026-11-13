@@ -1,7 +1,8 @@
 """
 Generates the seamless world textures used by the game:
 
-  assets/textures/ground_albedo.png   ground_normal.png   ground_emissive.png   (cracked lava crust)
+  assets/textures/ground_albedo.png   ground_normal.png                         (dark red sand)
+  assets/textures/lava_albedo.png     lava_normal.png     lava_emissive.png     (cracked lava crust, pools)
   assets/textures/bricks_albedo.png   bricks_normal.png
   assets/textures/concrete_albedo.png concrete_normal.png
 
@@ -11,7 +12,7 @@ Noise is built in the frequency domain, so every texture tiles perfectly.
 Usage (from the project root):
     pip install numpy pillow
     python tools/gen_textures.py              # everything
-    python tools/gen_textures.py lava         # only some: lava, bricks, concrete
+    python tools/gen_textures.py sand lava    # only some: sand, lava, bricks, concrete
 """
 from pathlib import Path
 
@@ -230,13 +231,49 @@ def lava_ground():
     plate = np.clip(big / 0.03, 0, 1) ** 0.5
     height = plate * 0.8 - second * 0.3 - hair * 0.15 + fbm(SIZE, base=24, octaves=4) * 0.12
 
+    save("lava_albedo.png", col.clip(0, 255).astype(np.uint8))
+    save("lava_emissive.png", emit.clip(0, 255).astype(np.uint8))
+    save("lava_normal.png", normal_map(height, 6.0))
+
+
+# ---------- sand: dark maroon volcanic sand, fine grain, darker patches, faint wind ripples ----------
+
+def sand():
+    rand = np.random.default_rng(42)
+    y, x = np.mgrid[0:SIZE, 0:SIZE] / SIZE
+    patches = fbm(SIZE, base=3, octaves=5)                         # large darker / lighter areas
+    mid = fbm(SIZE, base=14, octaves=4)                            # clumps
+    grain = rand.uniform(0, 1, (SIZE, SIZE))                       # individual grains
+    grain = (grain + np.roll(grain, 1, 0) + np.roll(grain, 1, 1)) / 3
+    specks = (rand.uniform(0, 1, (SIZE, SIZE)) > 0.985).astype(float)   # odd lighter grains
+    # wind ripples: stripes along a slowly bending direction, faded in and out by noise
+    bend = tileable_noise(SIZE, 2, 4) * 0.08
+    ripple = np.sin((x * 0.6 + y + bend) * 2 * np.pi * 18) * 0.5 + 0.5
+    ripple_mask = np.clip(tileable_noise(SIZE, 3, 6) * 0.5 + 0.4, 0, 1)
+
+    # small lumps (soft bumps) with scattered dark pits between them, like the reference
+    bumps = np.clip(tileable_noise(SIZE, 70, 6) * 0.28 + 0.5, 0, 1)
+    pits = np.clip((-tileable_noise(SIZE, 95, 8) - 1.15) * 1.4, 0, 1)
+    pits = np.maximum(pits, np.clip((-tileable_noise(SIZE, 45, 8) - 1.6) * 1.2, 0, 1))  # a few bigger ones
+
+    dark = np.array([52, 17, 16], float)
+    base = np.array([92, 32, 28], float)
+    light = np.array([128, 52, 42], float)
+    col = lerp(dark, base, np.clip(patches * 1.4 - 0.15, 0, 1))
+    col = lerp(col, light, np.clip(mid - 0.62, 0, 1) * 1.2)
+    col *= (0.8 + 0.35 * bumps)[..., None]
+    col = lerp(col, np.array([34, 13, 14], float), pits * 0.6)                         # dark pits
+    col *= (0.88 + 0.24 * grain)[..., None]
+    col *= (0.93 + 0.07 * ripple * ripple_mask)[..., None]
+    col = lerp(col, np.array([140, 72, 58], float), specks * 0.35)
+
+    height = bumps * 0.6 - pits * 0.5 + grain * 0.15 + ripple * ripple_mask * 0.3 + mid * 0.3
     save("ground_albedo.png", col.clip(0, 255).astype(np.uint8))
-    save("ground_emissive.png", emit.clip(0, 255).astype(np.uint8))
-    save("ground_normal.png", normal_map(height, 6.0))
+    save("ground_normal.png", normal_map(height, 5.0))
 
 
 if __name__ == "__main__":
     import sys
-    jobs = {"lava": lava_ground, "bricks": bricks, "concrete": concrete}
+    jobs = {"sand": sand, "lava": lava_ground, "bricks": bricks, "concrete": concrete}
     for name in (sys.argv[1:] or list(jobs)):
         jobs[name]()

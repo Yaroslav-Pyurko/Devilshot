@@ -4,7 +4,7 @@
 // overlaps it, so you can walk under a bridge, stand on it, or step onto a low ledge.
 // A box may have a sloped top (ramps): its height then changes linearly along one axis.
 import * as THREE from '../lib/three.module.js';
-import { ARENA, WALLS, STRUCTURES, GROUND } from './config.js';
+import { ARENA, WALLS, STRUCTURES, LAVA } from './config.js';
 import { clamp } from './utils.js';
 import { Sky } from './sky.js';
 
@@ -72,6 +72,13 @@ export class World {
     this._supports = new Set();
     for (const b of STRUCTURES.bridges) this.addBridge(b);
     for (const r of STRUCTURES.ramps) this.addRamp(r);
+    this.lavaPools = [];
+    this.lavaTextures = [textures.lava, textures.lavaNormal, textures.lavaEmissive];
+    this.lavaMaterial = new THREE.MeshStandardMaterial({
+      map: textures.lava, normalMap: textures.lavaNormal, roughness: 0.6, metalness: 0,
+      emissiveMap: textures.lavaEmissive, emissive: 0xffffff, emissiveIntensity: LAVA.glow // glows in the dark
+    });
+    for (const p of LAVA.pools) this.addLavaPool(p);
 
     this.solids = [...this.wallMeshes, this.terrain]; // everything bullets and sight lines stop at
   }
@@ -86,15 +93,14 @@ export class World {
       const h = heightAt(p.getX(i), p.getZ(i));
       p.setY(i, h);
       const t = clamp((h + 3) / 13, 0, 1);
-      // subtle tint: valleys a bit darker and warmer, hilltops lighter and dustier
-      cols.push(0.82 + t * 0.22, 0.76 + t * 0.2, 0.72 + t * 0.2);
+      // dim, slightly cool tint keeps the sand a dark maroon under the warm light;
+      // valleys a bit darker, hilltops a bit lighter
+      cols.push(0.55 + t * 0.2, 0.55 + t * 0.18, 0.6 + t * 0.18);
     }
     g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
     g.computeVertexNormals();
     const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
-      map: textures.ground, normalMap: textures.groundNormal, vertexColors: true, roughness: 0.9, metalness: 0,
-      // lava cracks glow on their own, in shadow too
-      emissiveMap: textures.groundEmissive, emissive: 0xffffff, emissiveIntensity: GROUND.glow
+      map: textures.ground, normalMap: textures.groundNormal, vertexColors: true, roughness: 0.9, metalness: 0
     }));
     this.scene.add(mesh);
     return mesh;
@@ -187,6 +193,51 @@ export class World {
     this.scene.add(mesh);
     this.wallMeshes.push(mesh);
     this.boxes.push({ minX: cx - w / 2, maxX: cx + w / 2, minZ: cz - d / 2, maxZ: cz + d / 2, base: h0 - thickness, top, slope, thickness });
+  }
+
+  // Flat lava surface filling a basin. Where the terrain rises above the surface it hides the
+  // disc, so the shoreline follows the ground. Radius: until the basin rim is above the lava all round.
+  addLavaPool({ x, z, depth }) {
+    const level = heightAt(x, z) + depth;
+    let r = 1;
+    for (; r < 14; r += 0.25) {
+      let rimAbove = true;
+      for (let a = 0; a < 64 && rimAbove; a++) {
+        const t = (a / 64) * Math.PI * 2;
+        if (heightAt(x + Math.cos(t) * r, z + Math.sin(t) * r) < level + 0.02) rimAbove = false;
+      }
+      if (rimAbove) break;
+    }
+    const g = new THREE.CircleGeometry(r, 64);
+    g.rotateX(-Math.PI / 2);
+    const uv = g.attributes.uv, k = (2 * r) / 4;            // one texture tile per ~4 m
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * k, uv.getY(i) * k);
+    const mesh = new THREE.Mesh(g, this.lavaMaterial);
+    mesh.position.set(x, level, z);
+    this.scene.add(mesh);
+    // warm light spilling onto the sand around the pool
+    const light = new THREE.PointLight(0xff4a14, 1.4, r * 2.6, 2);
+    light.position.set(x, level + 1.2, z);
+    this.scene.add(light);
+    this.lavaPools.push({ x, z, r, level, light, flicker: Math.random() * 10 });
+  }
+
+  // Animate what moves on its own: sky clouds, lava drift and its light.
+  update(dt, camera) {
+    this.sky.update(dt, camera);
+    for (const t of this.lavaTextures) { t.offset.x += LAVA.flow[0] * dt; t.offset.y += LAVA.flow[1] * dt; }
+    for (const p of this.lavaPools) {
+      p.flicker += dt;
+      p.light.intensity = 1.4 + Math.sin(p.flicker * 3.1) * 0.15 + Math.sin(p.flicker * 7.3) * 0.08;
+    }
+  }
+
+  // Lava pool these feet are standing in (on the ground, below the lava surface), or null.
+  lavaAt(p) {
+    for (const pool of this.lavaPools) {
+      if (Math.hypot(p.x - pool.x, p.z - pool.z) < pool.r && heightAt(p.x, p.z) < pool.level && p.y < pool.level) return pool;
+    }
+    return null;
   }
 
   // ---------- queries ----------

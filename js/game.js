@@ -155,7 +155,7 @@ export class Game {
     const headBob = reduceMotion || !p.ground ? 0 : Math.sin(p.bob) * PLAYER.headBob * speedK;
     this.camera.position.set(p.pos.x, p.pos.y + PLAYER.eyeHeight + headBob + p.landOffset, p.pos.z);
     this.camera.rotation.set(p.pitch, p.yaw, 0);
-    this.world.sky.update(dt, this.camera);
+    this.world.update(dt, this.camera);
     this.renderer.clear();
     this.renderer.render(this.scene, this.camera);
     this.viewModel.update(dt, p, this.weapon);

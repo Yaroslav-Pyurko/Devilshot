@@ -26,9 +26,17 @@ export const VIEWMODEL = {
   recoilImpulse: 7
 };
 
-// Ground: cooled lava crust with glowing cracks (textures from tools/gen_textures.py lava)
-export const GROUND = {
-  glow: 1.0               // brightness of the lava cracks; 0 turns the glow off
+// Lava pools in low ground (textures from tools/gen_textures.py lava). The pool radius is found
+// automatically: the lava fills the basin up to `depth` above its lowest point.
+export const LAVA = {
+  pools: [
+    { x: 19, z: -41, depth: 0.9 },   // north basin
+    { x: -32, z: -26, depth: 0.9 }   // north-west basin, by the brick wall
+  ],
+  damagePerSecond: 30,  // while standing in it (the imp is a demon: immune)
+  damageTick: 1 / 3,    // dealt in 10 HP steps, three times a second
+  glow: 1.3,            // brightness of the cracks
+  flow: [0.02, 0.008]   // slow drift of the crust (texture tiles per second)
 };
 
 // Sky dome (js/sky.js): colours and cloud motion
