@@ -10,6 +10,7 @@ import { ENEMY } from './config.js';
 import { randRange } from './utils.js';
 import { sfx } from './audio.js';
 import { ImpRig } from './impModel.js';
+import { t } from './i18n.js';
 
 const THROW_TIME = 0.6, THROW_RELEASE = 0.45; // fireball leaves the hand at 45% of the throw
 const MELEE_TIME = 0.45, MELEE_HIT = 0.35;
@@ -77,10 +78,10 @@ export class Imp {
 
   // Readable status for the HUD.
   get statusLabel() {
-    if (!this.alive) return `dead, respawn in ${Math.max(0, this.respawnTimer).toFixed(1)}s`;
-    if (this.state === AI_STATE.CHASE) return this.sees ? 'attacking' : 'chasing';
-    if (this.state === AI_STATE.SEARCH) return 'searching';
-    return 'wandering';
+    if (!this.alive) return t('aiDead', { s: Math.max(0, this.respawnTimer).toFixed(1) });
+    if (this.state === AI_STATE.CHASE) return t(this.sees ? 'aiAttack' : 'aiChase');
+    if (this.state === AI_STATE.SEARCH) return t('aiSearch');
+    return t('aiWander');
   }
 
   takeDamage(amount) {

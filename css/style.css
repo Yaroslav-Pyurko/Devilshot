@@ -1,10 +1,109 @@
 /* Layout: full-screen low-res 3D view, pixel HUD canvas on top,
    stone status bar at the bottom, centered start/pause panel. */
 
-@font-face { font-family: "Silkscreen"; font-weight: 400; font-display: swap; src: url("../assets/fonts/silkscreen-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Silkscreen"; font-weight: 700; font-display: swap; src: url("../assets/fonts/silkscreen-latin-700-normal.woff2") format("woff2"); }
-@font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap; src: url("../assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "IBM Plex Sans"; font-weight: 600; font-display: swap; src: url("../assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); }
+/* Fonts are split by script: the browser only downloads a file when that alphabet is on screen.
+   Display: Rubik (one family covers Latin + Polish, Ukrainian Cyrillic and Hebrew).
+   Body: IBM Plex Sans (Latin, Cyrillic) and IBM Plex Sans Hebrew. All SIL Open Font License, see assets/fonts/OFL-*.txt. */
+@font-face {
+  font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-cyrillic-400-normal.woff2") format("woff2");
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans"; font-weight: 600; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-cyrillic-600-normal.woff2") format("woff2");
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: "IBM Plex Sans"; font-weight: 600; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "IBM Plex Sans"; font-weight: 600; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans Hebrew"; font-weight: 400; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-hebrew-hebrew-400-normal.woff2") format("woff2");
+  unicode-range: U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: "IBM Plex Sans Hebrew"; font-weight: 600; font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-hebrew-hebrew-600-normal.woff2") format("woff2");
+  unicode-range: U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 500; font-display: swap;
+  src: url("../assets/fonts/rubik-cyrillic-500-normal.woff2") format("woff2");
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 500; font-display: swap;
+  src: url("../assets/fonts/rubik-hebrew-500-normal.woff2") format("woff2");
+  unicode-range: U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 500; font-display: swap;
+  src: url("../assets/fonts/rubik-latin-ext-500-normal.woff2") format("woff2");
+  unicode-range: U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 500; font-display: swap;
+  src: url("../assets/fonts/rubik-latin-500-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 700; font-display: swap;
+  src: url("../assets/fonts/rubik-cyrillic-700-normal.woff2") format("woff2");
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 700; font-display: swap;
+  src: url("../assets/fonts/rubik-hebrew-700-normal.woff2") format("woff2");
+  unicode-range: U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 700; font-display: swap;
+  src: url("../assets/fonts/rubik-latin-ext-700-normal.woff2") format("woff2");
+  unicode-range: U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 700; font-display: swap;
+  src: url("../assets/fonts/rubik-latin-700-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 900; font-display: swap;
+  src: url("../assets/fonts/rubik-cyrillic-900-normal.woff2") format("woff2");
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 900; font-display: swap;
+  src: url("../assets/fonts/rubik-hebrew-900-normal.woff2") format("woff2");
+  unicode-range: U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 900; font-display: swap;
+  src: url("../assets/fonts/rubik-latin-ext-900-normal.woff2") format("woff2");
+  unicode-range: U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Rubik"; font-weight: 900; font-display: swap;
+  src: url("../assets/fonts/rubik-latin-900-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
 
 :root {
   --stone: #1d1513;
@@ -13,8 +112,8 @@
   --ash: #9c8c7c;
   --blood: #d8392a;
   --ember: #ffb43a;
-  --display: "Silkscreen", "Courier New", monospace;
-  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --display: "Rubik", "IBM Plex Sans Hebrew", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "IBM Plex Sans Hebrew", system-ui, sans-serif;
   color-scheme: dark;
 }
 
@@ -42,11 +141,11 @@ body { background: var(--stone); color: var(--bone); font-family: var(--body); o
   font-family: var(--display); pointer-events: none;
 }
 .stat { display: flex; gap: 8px; align-items: baseline; }
-.stat b { font-size: 26px; color: var(--blood); font-variant-numeric: tabular-nums; line-height: 1; font-weight: 700; }
+.stat b { font-size: 26px; color: var(--blood); font-variant-numeric: tabular-nums; line-height: 1; font-weight: 900; }
 .stat b.warn { color: var(--ember); }
-.stat span { font-size: 11px; letter-spacing: 0.08em; color: var(--ash); }
-.stat.ai b { font-size: 15px; color: var(--ember); }
-.stat.fps { margin-left: auto; }
+.stat span { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; color: var(--ash); }
+.stat.ai b { font-size: 15px; font-weight: 700; color: var(--ember); }
+.stat.fps { margin-inline-start: auto; }
 .stat.fps b { font-size: 13px; color: var(--ash); }
 
 #overlay {
@@ -59,27 +158,35 @@ body { background: var(--stone); color: var(--bone); font-family: var(--body); o
 .panel { max-width: 30rem; width: 100%; display: grid; gap: 18px; }
 .panel h1 {
   font-family: var(--display); font-size: clamp(34px, 8vw, 56px); margin: 0;
-  color: var(--blood); letter-spacing: 0.04em; line-height: 1;
+  color: var(--blood); font-weight: 900; letter-spacing: 0.02em; line-height: 1;
   text-shadow: 3px 3px 0 #000; text-wrap: balance;
 }
 .panel p { margin: 0; line-height: 1.5; }
 .keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
 .keys kbd {
-  font-family: var(--display); font-size: 12px; color: var(--ember);
+  font-family: var(--display); font-size: 12px; font-weight: 500; letter-spacing: 0.04em; color: var(--ember);
   background: #000; padding: 2px 6px; border: 1px solid #4a3a32;
   white-space: nowrap; justify-self: start;
 }
 .settings {
-  display: grid; grid-template-columns: auto 1fr 3.5em; gap: 12px; align-items: center;
+  display: grid; grid-template-columns: auto 1fr 3.5em; gap: 10px 12px; align-items: center;
   padding: 10px 12px; background: rgba(0, 0, 0, 0.45); border: 1px solid #4a3a32;
   cursor: default; font-size: 14px;
 }
 .settings label { color: var(--ash); white-space: nowrap; }
-.settings output { font-family: var(--display); color: var(--ember); text-align: right; font-variant-numeric: tabular-nums; }
+.settings select {
+  grid-column: 2 / -1; justify-self: start; min-width: 0; max-width: 100%;
+  font: inherit; color: var(--bone); background: #120c0a; border: 1px solid #4a3a32; padding: 4px 8px; cursor: pointer;
+}
+.settings select:focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
+.settings output { font-family: var(--display); font-weight: 500; color: var(--ember); text-align: end; font-variant-numeric: tabular-nums; }
 .settings input[type="range"] { width: 100%; min-width: 0; accent-color: var(--ember); cursor: pointer; }
 .settings input[type="range"]:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
-@media (max-width: 420px) { .settings { grid-template-columns: 1fr 3.5em; } .settings label { grid-column: 1 / -1; } }
+@media (max-width: 420px) { .settings { grid-template-columns: 1fr 3.5em; } .settings label { grid-column: 1 / -1; } .settings select { grid-column: 1 / -1; } }
 
-.go { font-family: var(--display); font-size: 16px; color: #000; background: var(--ember); padding: 10px 14px; justify-self: start; border: 0; cursor: pointer; }
+/* Hebrew is right-to-left: layout mirrors via dir="rtl"; letter-spaced caps make no sense there */
+:root[dir="rtl"] .stat span, :root[dir="rtl"] .panel h1 { letter-spacing: 0; }
+
+.go { font-family: var(--display); font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: #000; background: var(--ember); padding: 10px 14px; justify-self: start; border: 0; cursor: pointer; }
 .go:focus-visible { outline: 3px solid var(--bone); outline-offset: 3px; }
 .note { font-size: 12px; color: var(--ash); }

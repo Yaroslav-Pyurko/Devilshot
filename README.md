@@ -35,11 +35,12 @@ js/hud.js           crosshair canvas, status bar
 js/input.js         keyboard, mouse, pointer lock
 js/overlay.js       start / pause / death screen, mouse sensitivity slider
 js/settings.js      player settings saved in the browser (localStorage)
+js/i18n.js          interface translations (English, Ukrainian, Polish, Hebrew with RTL)
 js/textures.js      texture loading/filtering, particle sprites
 js/audio.js         synthesized WebAudio sound effects
 js/utils.js         small helpers
 lib/three.module.js Three.js r128 (MIT, see lib/three.LICENSE.txt)
-assets/fonts/       Silkscreen and IBM Plex Sans (OFL)
+assets/fonts/       Rubik (display) and IBM Plex Sans (+ Hebrew), split by script; OFL licences included
 assets/textures/    512px seamless albedo + normal maps (generated)
 tools/gen_textures.py  regenerates assets/textures (Python, numpy + pillow)
 ```

@@ -13,11 +13,11 @@
 <div id="flash"></div>
 
 <div id="bar">
-  <div class="stat"><b id="hp">100</b><span>HEALTH</span></div>
-  <div class="stat"><b id="ammo">40</b><span>AMMO</span></div>
-  <div class="stat"><b id="kills">0</b><span>FRAGS</span></div>
-  <div class="stat ai"><span>AI</span><b id="ai">wandering</b></div>
-  <div class="stat fps"><b id="fps">60</b><span>FPS</span></div>
+  <div class="stat"><b id="hp">100</b><span data-i18n="hudHealth">HEALTH</span></div>
+  <div class="stat"><b id="ammo">40</b><span data-i18n="hudAmmo">AMMO</span></div>
+  <div class="stat"><b id="kills">0</b><span data-i18n="hudFrags">FRAGS</span></div>
+  <div class="stat ai"><span data-i18n="hudAi">AI</span><b id="ai">wandering</b></div>
+  <div class="stat fps"><b id="fps">60</b><span data-i18n="hudFps">FPS</span></div>
 </div>
 
 <div id="overlay">
@@ -25,20 +25,22 @@
     <h1 id="ovTitle">DEVILSHOT</h1>
     <p id="ovText">Test spike: hilly terrain, walls, a hitscan shotgun and one imp with simple AI. It wanders, spots you, chases you, throws fireballs and searches the place it last saw you.</p>
     <div class="keys">
-      <kbd>W A S D</kbd><span>move</span>
-      <kbd>Mouse</kbd><span>look</span>
-      <kbd>LMB</kbd><span>shoot (hold for auto fire)</span>
-      <kbd>Shift</kbd><span>run</span>
-      <kbd>Space</kbd><span>jump</span>
-      <kbd>Esc</kbd><span>pause</span>
+      <kbd>W A S D</kbd><span data-i18n="move">move</span>
+      <kbd data-i18n="keyMouse">Mouse</kbd><span data-i18n="look">look</span>
+      <kbd data-i18n="keyLmb">LMB</kbd><span data-i18n="shoot">shoot (hold for auto fire)</span>
+      <kbd data-i18n="keyShift">Shift</kbd><span data-i18n="run">run</span>
+      <kbd data-i18n="keySpace">Space</kbd><span data-i18n="jump">jump</span>
+      <kbd data-i18n="keyEsc">Esc</kbd><span data-i18n="pause">pause</span>
     </div>
     <div class="settings">
-      <label for="sens">Mouse sensitivity</label>
+      <label for="lang" data-i18n="language">Language</label>
+      <select id="lang"></select>
+      <label for="sens" data-i18n="sensitivity">Mouse sensitivity</label>
       <input type="range" id="sens" min="0.1" max="3" step="0.05" value="1">
       <output id="sensValue" for="sens">1.00</output>
     </div>
     <button class="go" id="goBtn" type="button">CLICK TO PLAY</button>
-    <p class="note">Needs a keyboard and mouse. Not playable on phones.</p>
+    <p class="note" data-i18n="note">Needs a keyboard and mouse. Not playable on phones.</p>
   </div>
 </div>
 
