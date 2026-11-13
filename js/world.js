@@ -8,7 +8,7 @@ import { ARENA, WALLS, STRUCTURES } from './config.js';
 import { clamp } from './utils.js';
 
 export const STEP_HEIGHT = 0.45; // ledges up to this high are stepped onto, not blocked by
-export const BODY_HEIGHT = 1.8;  // feet to top of head, for player and imp alike
+export const BODY_HEIGHT = 1.95; // collision height: head plus room above the camera (eye at 1.75), player and imp alike
 
 // Analytic height field: flat arena in the middle, rolling hills outside.
 export function heightAt(x, z) {
@@ -38,6 +38,17 @@ function topAt(b, x, z) { return b.slope ? slopeHeight(b.slope, x, z) : b.top; }
 
 // Height of a box's underside at (x, z): ramps are slabs, so their underside follows the slope.
 function baseAt(b, x, z) { return b.slope ? slopeHeight(b.slope, x, z) - b.thickness : b.base; }
+
+// Lowest underside anywhere under a body of radius r at (x, z). Under a sloped ramp the lowest
+// point is not under the centre but at the body's edge on the downhill side.
+function minBaseNear(b, x, z, r) {
+  if (!b.slope) return b.base;
+  const alongX = b.slope.axis === 'x';
+  const c = alongX ? x : z, lo = alongX ? b.minX : b.minZ, hi = alongX ? b.maxX : b.maxZ;
+  const h1 = slopeHeight(b.slope, alongX ? clamp(c - r, lo, hi) : x, alongX ? z : clamp(c - r, lo, hi));
+  const h2 = slopeHeight(b.slope, alongX ? clamp(c + r, lo, hi) : x, alongX ? z : clamp(c + r, lo, hi));
+  return Math.min(h1, h2) - b.thickness;
+}
 
 export class World {
   constructor(scene, textures) {
@@ -192,7 +203,7 @@ export class World {
     const lo = feetY + STEP_HEIGHT, hi = feetY + BODY_HEIGHT;
     for (const b of this.boxes) {
       const nx = clamp(x, b.minX, b.maxX), nz = clamp(z, b.minZ, b.maxZ);
-      if (baseAt(b, nx, nz) >= hi) continue;               // high enough to walk under
+      if (minBaseNear(b, x, z, r) >= hi) continue;         // high enough to walk under
       if (topAt(b, nx, nz) <= lo) continue;               // low enough to step onto (or walk up a ramp)
       if ((x - nx) ** 2 + (z - nz) ** 2 < r * r) return true;
     }
@@ -219,7 +230,7 @@ export class World {
     for (const b of this.boxes) {
       const nx = clamp(x, b.minX, b.maxX), nz = clamp(z, b.minZ, b.maxZ);
       if ((x - nx) ** 2 + (z - nz) ** 2 > r * r) continue;
-      const base = baseAt(b, nx, nz);
+      const base = minBaseNear(b, x, z, r);
       if (base >= feetY + 0.5 && base < c) c = base;
     }
     return c;
@@ -233,7 +244,7 @@ export class World {
       const nx = clamp(p.x, b.minX, b.maxX), nz = clamp(p.z, b.minZ, b.maxZ);
       const dx = p.x - nx, dz = p.z - nz, d2 = dx * dx + dz * dz;
       if (d2 >= r * r) continue;
-      if (topAt(b, nx, nz) <= lo || baseAt(b, nx, nz) >= hi) continue;
+      if (topAt(b, nx, nz) <= lo || minBaseNear(b, p.x, p.z, r) >= hi) continue;
       if (d2 > 1e-8) {
         const d = Math.sqrt(d2), k = (r - d + 0.001) / d;
         p.x += dx * k; p.z += dz * k;
