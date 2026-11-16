@@ -38,12 +38,12 @@ js/overlay.js       start / pause / death screen, mouse sensitivity slider
 js/settings.js      player settings saved in the browser (localStorage)
 js/i18n.js          interface translations (English, Ukrainian, Polish, Hebrew with RTL)
 js/textures.js      texture loading/filtering, particle sprites
-js/audio.js         synthesized WebAudio sound effects
+js/audio.js         WebAudio: recorded samples, positional voices, synthesized roar and effects
 js/utils.js         small helpers
 lib/three.module.js Three.js r128 (MIT, see lib/three.LICENSE.txt)
 assets/fonts/       Rubik (display) and IBM Plex Sans (+ Hebrew), split by script; OFL licences included
 assets/textures/    512px seamless albedo + normal maps: sand, lava (+ glow map), bricks, concrete (generated)
-assets/sounds/      recorded samples (jump.mp3: trimmed, mono 22 kHz, ~2 KB); other effects are synthesized in js/audio.js
+assets/sounds/      recorded samples: jump.mp3 (~2 KB), imp_growl.mp3 (3 s seamless loop, positional: louder as the imp gets closer), fireball_start_launching.mp3, fireball_finish_hits.mp3 (the flight roar between them is synthesized, Quake 3 rocket style, with Doppler); other effects are synthesized in js/audio.js
 tools/gen_textures.py  regenerates assets/textures (Python, numpy + pillow)
 ```
 

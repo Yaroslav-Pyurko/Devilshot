@@ -111,14 +111,22 @@ export const ENEMY = {
   meleeDamage: 10,
   meleeCooldown: 0.9,
   respawnDelay: 5,
-  respawnDistance: [28, 48]
+  respawnDistance: [28, 48],
+  growlVolume: 0.85,    // the imp's constant growl (assets/sounds/imp_growl.mp3) at point-blank range
+  growlRange: 40        // metres: beyond this it is silent; it gets louder smoothly as the imp comes closer
 };
 
 export const FIREBALL = {
   speed: 15,
   damage: 15,
   lifetime: 4,
-  hitRadius: 0.9
+  hitRadius: 0.9,
+  // Sounds (assets/sounds). Volumes are at point-blank range; all of them fade out over soundRange.
+  launchVolume: 0.8,    // fireball_start_launching.mp3: leaves the imp's hand
+  flightVolume: 0.3,    // synthesized roar (Roar in js/audio.js) that flies with the ball until it explodes
+  doppler: 0.2,         // pitch shift as the ball flies at you (+20%) or away (-20%); 0 turns it off
+  hitVolume: 1,         // fireball_finish_hits.mp3: explosion on impact
+  soundRange: 45        // metres: beyond this it is silent; louder as the ball comes at you
 };
 
 // [centerX, centerZ, width (X), depth (Z), height above terrain]

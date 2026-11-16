@@ -1,8 +1,8 @@
 // Wires all systems together and runs the main loop.
 import * as THREE from '../lib/three.module.js';
-import { RENDER, PLAYER, WEAPON } from './config.js';
+import { RENDER, PLAYER, WEAPON, ENEMY } from './config.js';
 import { reduceMotion } from './utils.js';
-import { unlockAudio } from './audio.js';
+import { unlockAudio, LoopSound } from './audio.js';
 import { createTextures } from './textures.js';
 import { World } from './world.js';
 import { Particles } from './particles.js';
@@ -33,6 +33,7 @@ export class Game {
     this.weapon = new Weapon(this.camera, this.world, this.particles);
     this.enemy = new Imp(this.scene, this.world, this.fireballs, this.player);
     this.enemies = [this.enemy]; // add more imps here later; weapon already takes a list
+    this.impGrowl = new LoopSound('impGrowl');
     this.viewModel = new ViewModel(this.renderer, textures.fire);
 
     this.hud = new Hud($('hud'), { hp: $('hp'), ammo: $('ammo'), kills: $('kills'), ai: $('ai'), fps: $('fps'), flash: $('flash') });
@@ -161,5 +162,16 @@ export class Game {
     this.viewModel.update(dt, p, this.weapon);
     this.viewModel.render(this.renderer);
     this.hud.update(dt, p, this.weapon, this.enemy);
+    this._updateEnemyAudio();
+  }
+
+  // The imp growls all the time: louder as it gets closer, panned to the side it is on.
+  // Silent while dead or while the game is paused.
+  _updateEnemyAudio() {
+    const e = this.enemy, p = this.player;
+    this.fireballs.updateAudio(p, this.playing);   // each fireball carries its own whoosh
+    if (!this.playing || !e.alive) { this.impGrowl.set(0); return; }
+    const { volume, pan } = p.hear(e.pos, ENEMY.growlRange);
+    this.impGrowl.set(ENEMY.growlVolume * volume, pan);
   }
 }

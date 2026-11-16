@@ -144,4 +144,14 @@ export class Player {
 
   // 0..1 loudness for a sound at point p.
   volumeAt(p) { return clamp(1 - p.distanceTo(this.pos) / 60, 0.08, 1); }
+
+  // How a sound at point p is heard: volume 0..1 (silent beyond `range` metres, rising smoothly as it
+  // comes closer) and stereo pan -1..1 (how far to the right of where we look).
+  hear(p, range) {
+    const dx = p.x - this.pos.x, dz = p.z - this.pos.z;
+    const k = Math.max(0, 1 - Math.hypot(dx, p.y - this.pos.y, dz) / range);
+    const flat = Math.hypot(dx, dz) || 1;
+    const pan = ((dx * Math.cos(this.yaw) - dz * Math.sin(this.yaw)) / flat) * 0.8;
+    return { volume: k * k, pan };
+  }
 }
