@@ -60,6 +60,18 @@ def normal_map(height, strength):
     return ((n * 0.5 + 0.5) * 255).clip(0, 255).astype(np.uint8)
 
 
+def flatten_tone(col, sigma_frac=0.1, amount=1.0):
+    """Remove large-scale brightness changes inside a tile (they repeat into a visible grid on big
+    surfaces); fine detail is kept. The large-scale variation comes from the shader instead."""
+    size = col.shape[0]
+    lum = col.mean(-1)
+    f = np.fft.fftfreq(size)
+    fx, fy = np.meshgrid(f, f)
+    blur = np.real(np.fft.ifft2(np.fft.fft2(lum) * np.exp(-2 * (np.pi * sigma_frac * size) ** 2 * (fx ** 2 + fy ** 2))))
+    gain = (lum.mean() / np.maximum(blur, 1e-3)) ** amount
+    return col * gain[..., None]
+
+
 def lerp(a, b, t):
     return a + (b - a) * t[..., None]
 
@@ -259,13 +271,16 @@ def sand():
     dark = np.array([52, 17, 16], float)
     base = np.array([92, 32, 28], float)
     light = np.array([128, 52, 42], float)
-    col = lerp(dark, base, np.clip(patches * 1.4 - 0.15, 0, 1))
+    # tone stays even across the tile: big dark / light patches would repeat into a grid on the
+    # terrain, so they come from the shader's macro variation (js/antiTiling.js) instead
+    col = lerp(dark, base, np.clip(patches * 0.25 + 0.72, 0, 1))
     col = lerp(col, light, np.clip(mid - 0.62, 0, 1) * 1.2)
     col *= (0.8 + 0.35 * bumps)[..., None]
     col = lerp(col, np.array([34, 13, 14], float), pits * 0.6)                         # dark pits
     col *= (0.88 + 0.24 * grain)[..., None]
     col *= (0.93 + 0.07 * ripple * ripple_mask)[..., None]
     col = lerp(col, np.array([140, 72, 58], float), specks * 0.35)
+    col = flatten_tone(col) * 0.9   # even out what is left at tile scale; 0.9 keeps the old overall darkness
 
     height = bumps * 0.6 - pits * 0.5 + grain * 0.15 + ripple * ripple_mask * 0.3 + mid * 0.3
     save("ground_albedo.png", col.clip(0, 255).astype(np.uint8))

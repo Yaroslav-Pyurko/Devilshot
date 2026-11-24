@@ -45,8 +45,8 @@ export const GROUND_TILING = {
   cellScale: 0.35,       // stochastic tiling: how big the areas with one texture offset are (smaller = bigger areas)
   farScale: 0.25,        // far away the texture is also sampled 4x larger...
   farRange: [18, 60],    // ...fading in between these distances (metres)
-  macroScale: 1 / 28,    // macro variation: size of the darker / lighter / browner patches (1 / metres)
-  macroStrength: 0.18    // how strong those patches are (0 turns them off)
+  macroScale: 1 / 20,    // macro variation: size of the darker / lighter / browner patches (1 / metres)
+  macroStrength: 0.35    // how strong those patches are (0 turns them off)
 };
 
 // Sky dome (js/sky.js): colours and cloud motion
