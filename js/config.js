@@ -39,6 +39,16 @@ export const LAVA = {
   flow: [0.02, 0.008]   // slow drift of the crust (texture tiles per second)
 };
 
+// Ground texture repetition breakers (js/antiTiling.js). No fog involved.
+export const GROUND_TILING = {
+  enabled: true,
+  cellScale: 0.35,       // stochastic tiling: how big the areas with one texture offset are (smaller = bigger areas)
+  farScale: 0.25,        // far away the texture is also sampled 4x larger...
+  farRange: [18, 60],    // ...fading in between these distances (metres)
+  macroScale: 1 / 28,    // macro variation: size of the darker / lighter / browner patches (1 / metres)
+  macroStrength: 0.18    // how strong those patches are (0 turns them off)
+};
+
 // Sky dome (js/sky.js): colours and cloud motion
 export const SKY = {
   zenith: 0x2e0e0e,       // overhead: dark crimson

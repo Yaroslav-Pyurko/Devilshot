@@ -4,7 +4,8 @@
 // overlaps it, so you can walk under a bridge, stand on it, or step onto a low ledge.
 // A box may have a sloped top (ramps): its height then changes linearly along one axis.
 import * as THREE from '../lib/three.module.js';
-import { ARENA, WALLS, STRUCTURES, LAVA } from './config.js';
+import { ARENA, WALLS, STRUCTURES, LAVA, GROUND_TILING } from './config.js';
+import { applyAntiTiling } from './antiTiling.js';
 import { clamp } from './utils.js';
 import { Sky } from './sky.js';
 
@@ -99,9 +100,11 @@ export class World {
     }
     g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
     g.computeVertexNormals();
-    const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshStandardMaterial({
       map: textures.ground, normalMap: textures.groundNormal, vertexColors: true, roughness: 0.9, metalness: 0
-    }));
+    });
+    if (GROUND_TILING.enabled) applyAntiTiling(material, GROUND_TILING);   // no visible grid in the distance
+    const mesh = new THREE.Mesh(g, material);
     this.scene.add(mesh);
     return mesh;
   }

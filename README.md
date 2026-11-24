@@ -24,6 +24,7 @@ js/main.js          entry point
 js/game.js          wires the systems, owns renderer/scene/camera and the main loop
 js/config.js        all tunable numbers and the wall layout
 js/world.js         terrain, walls, concrete bridges and ramps; 3D box collision with ramps, floors, ceilings, line of sight
+js/antiTiling.js    hides ground texture repetition: stochastic tiling, distance blend, macro variation (shader patch)
 js/sky.js           Quake 3 style sky dome: two layers of fast scrolling procedural clouds (shader)
 js/player.js        movement, gravity, jumping, health
 js/weapon.js        hitscan shotgun, ammo, muzzle flash, recoil
@@ -63,5 +64,6 @@ Tweak colors, noise and brick layout in the script, rerun, refresh the browser.
 - Gameplay tuning: `js/config.js`.
 - More enemies: create more `Imp` instances in `Game` and push them to `this.enemies`.
 - Level layout: `WALLS` and `STRUCTURES` (bridges, ramps) in `js/config.js`, terrain shape in `heightAt()` in `js/world.js`.
+- Ground texture repetition: `GROUND_TILING` in `js/config.js` (`applyAntiTiling()` works on any MeshStandardMaterial).
 - Lava pools and their damage: `LAVA` in `js/config.js` (pools sit in terrain basins, radius is found automatically).
 - Better pathfinding: replace `Imp._move()` steering with A* over a grid built from `world.blocked()`.
