@@ -21,6 +21,35 @@ export function heightAt(x, z) {
     + 1.3 * Math.cos(z * 0.21 - x * 0.08)) + k * k * 4;
 }
 
+// Raycast against the analytic height field: march along the ray in 0.25 m steps until it dips
+// below the ground, then refine by bisection. Far cheaper than testing every triangle of the dense
+// terrain mesh, and exact. Used as the terrain mesh's raycast(), so Raycaster treats it like any mesh.
+const HALF_TERRAIN = 85, RAY_STEP = 0.25;
+const _rayPoint = new THREE.Vector3();
+function terrainRaycast(raycaster, intersects) {
+  const { origin: o, direction: d } = raycaster.ray;
+  const below = t => o.y + d.y * t - heightAt(o.x + d.x * t, o.z + d.z * t);
+  const far = Math.min(raycaster.far, 400);
+  let t0 = raycaster.near, b0 = below(t0);
+  if (b0 < 0) return;   // starts underground: ignore
+  for (let t1 = t0 + RAY_STEP; t0 < far; t1 += RAY_STEP) {
+    t1 = Math.min(t1, far);
+    const b1 = below(t1);
+    if (b1 < 0) {
+      for (let k = 0; k < 14; k++) {   // bisection to ~0.03 mm
+        const tm = (t0 + t1) / 2;
+        if (below(tm) < 0) t1 = tm; else t0 = tm;
+      }
+      const point = _rayPoint.copy(d).multiplyScalar(t1).add(o).clone();
+      if (Math.abs(point.x) <= HALF_TERRAIN && Math.abs(point.z) <= HALF_TERRAIN) {
+        intersects.push({ distance: t1, point, object: this });
+      }
+      return;
+    }
+    t0 = t1; b0 = b1;
+  }
+}
+
 // Lowest and highest terrain under a rectangle (corners + centre are enough for these hills).
 function terrainSpan(cx, cz, w, d) {
   let lo = Infinity, hi = -Infinity;
@@ -99,12 +128,21 @@ export class World {
       cols.push(0.55 + t * 0.2, 0.55 + t * 0.18, 0.6 + t * 0.18);
     }
     g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
-    g.computeVertexNormals();
+    // normals straight from the height function (not averaged from faces): smooth shading, no facets
+    const n = g.attributes.normal, e = 0.05;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), z = p.getZ(i);
+      const nx = -(heightAt(x + e, z) - heightAt(x - e, z)) / (2 * e);
+      const nz = -(heightAt(x, z + e) - heightAt(x, z - e)) / (2 * e);
+      const l = Math.hypot(nx, 1, nz);
+      n.setXYZ(i, nx / l, 1 / l, nz / l);
+    }
     const material = new THREE.MeshStandardMaterial({
       map: textures.ground, normalMap: textures.groundNormal, vertexColors: true, roughness: 0.9, metalness: 0
     });
     if (GROUND_TILING.enabled) applyAntiTiling(material, GROUND_TILING);   // no visible grid in the distance
     const mesh = new THREE.Mesh(g, material);
+    mesh.raycast = terrainRaycast;   // bullets and sight lines hit the exact height field, not 130k triangles
     this.scene.add(mesh);
     return mesh;
   }

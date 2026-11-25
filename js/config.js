@@ -64,7 +64,7 @@ export const SKY = {
 
 export const ARENA = {
   terrainSize: 170,
-  terrainSegments: 85,
+  terrainSegments: 256, // mesh density: 170 m / 256 = 0.66 m per quad, so hill crests stay round
   limit: 58,            // hard clamp for the player, boundary walls sit at ±60
   spawnLimit: 54
 };

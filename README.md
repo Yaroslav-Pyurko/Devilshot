@@ -23,7 +23,7 @@ css/style.css       UI styles, local @font-face
 js/main.js          entry point
 js/game.js          wires the systems, owns renderer/scene/camera and the main loop
 js/config.js        all tunable numbers and the wall layout
-js/world.js         terrain, walls, concrete bridges and ramps; 3D box collision with ramps, floors, ceilings, line of sight
+js/world.js         terrain (dense mesh, analytic normals and raycast), walls, concrete bridges and ramps; 3D box collision with ramps, floors, ceilings, line of sight
 js/antiTiling.js    hides ground texture repetition: stochastic tiling, distance blend, macro variation (shader patch)
 js/sky.js           Quake 3 style sky dome: two layers of fast scrolling procedural clouds (shader)
 js/player.js        movement, gravity, jumping, health
